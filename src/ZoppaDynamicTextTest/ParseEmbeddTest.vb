@@ -131,4 +131,18 @@ Public Class ParseEmbeddTest
         Assert.True(result3.Expression.GetValue(Nothing).Str.Equals("A|B|C"))
     End Sub
 
+    <Fact>
+    Public Sub ParseEmbeddTest_DynamicObject()
+        Dim obj As New DynamicObject()
+        obj("name") = "Zoppa"
+        obj("age") = 49
+
+        Dim venv As New AnalysisEnvironment()
+        venv.RegistObject("person", obj)
+
+        Dim input = U8String.NewString("name=#{person.name}, age=#{person.age}")
+        Dim result = ParserModule.Translate(input)
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("name=Zoppa, age=49"))
+    End Sub
+
 End Class

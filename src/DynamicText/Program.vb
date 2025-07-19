@@ -1,6 +1,7 @@
 ﻿Option Strict On
 Option Explicit On
 
+Imports System.IO
 Imports System.Runtime.CompilerServices
 Imports ZoppaDynamicText.Analysis
 Imports ZoppaDynamicText.Switches
@@ -71,9 +72,27 @@ Module Program
 
             ' 解析環境を初期化し、オブジェクトを登録します。
             Dim env As New AnalysisEnvironment()
-            Dim result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
-            Dim resultStr = result.Expression.GetValue(env).Str.ToString()
+            Dim resultStr As String = String.Empty
+            Select Case Path.GetExtension(paramPath).ToLowerInvariant()
+                Case ".json"
+                    ' JSONファイルの内容を解析して環境に登録します。
+                    Dim jsonObject = ReadJsonModule.ConvertDynamicObjectFromJson(paramStr)
+                    Dim iter = jsonObject.GetEntries()
+                    While iter.MoveNext()
+                        env.RegistObject(iter.Current.Name, iter.Current.Value)
+                    End While
+                    Dim result = ParserModule.Translate(tempStr)
+                    resultStr = result.Expression.GetValue(env).Str.ToString()
+
+                Case Else
+                    ' パラメータファイルの内容を解析して環境に登録します。
+                    Dim result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
+                    resultStr = result.Expression.GetValue(env).Str.ToString()
+            End Select
+
+            ' 結果を出力します。
             If analysisSwitches.ContainsOption("output") Then
+                ' 出力結果を指定されたファイルに書き込みます。
                 Dim outputPath = analysisSwitches.GetOption("output").GetURI().ConvertAbsolutePath()
                 Dim outputDir = System.IO.Path.GetDirectoryName(outputPath)
                 If Not IO.Directory.Exists(outputDir) Then
@@ -81,6 +100,7 @@ Module Program
                 End If
                 System.IO.File.WriteAllText(outputPath, resultStr, encode)
             Else
+                ' 出力結果をコンソールに表示します。
                 System.Console.Out.WriteLine(resultStr)
             End If
 

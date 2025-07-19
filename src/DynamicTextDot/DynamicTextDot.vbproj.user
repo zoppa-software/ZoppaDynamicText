@@ -4,6 +4,6 @@
     <StartArguments>--template G:\source\ZoppaDynamicText\DynamicTextDot\resources\template.txt --param resources\param.txt</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>--template G:\source\ZoppaDynamicText\DynamicTextDot\resources\template.txt --param resources\param.txt</StartArguments>
+    <StartArguments>--template resources\template.txt --param resources\param.json</StartArguments>
   </PropertyGroup>
 </Project>

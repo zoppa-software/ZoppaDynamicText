@@ -49,25 +49,36 @@ Namespace Analysis
         ''' </remarks>
         Public Function GetValue(venv As AnalysisEnvironment) As IValue Implements IExpression.GetValue
             ' 変数を取得
-            Dim obj = _target.GetValue(venv).Obj
-            If obj Is Nothing Then
+            Dim target = _target.GetValue(venv).Obj
+            If target Is Nothing Then
                 Return NullValue.Value
             End If
 
-            ' プロパティ名を使用してオブジェクトのプロパティにアクセス
-            Dim propInfo As PropertyInfo = obj.GetType().GetProperty(_propertyName)
-            If propInfo Is Nothing Then
-                Throw New InvalidOperationException($"プロパティ '{_propertyName}' が見つかりません。")
-            End If
+            If TypeOf target Is DynamicObject Then
+                ' DynamicObjectの場合、プロパティ名を使用して値を取得
+                Dim obj = DirectCast(target, DynamicObject)(_propertyName)
 
-            ' プロパティの値を取得
-            obj = propInfo.GetValue(obj, Nothing)
+                ' 最終的な値をIValueに変換して返す
+                If TypeOf obj Is IValue Then
+                    Return DirectCast(obj, IValue)
+                End If
+                Return ConvertToValue(obj)
+            Else
+                ' プロパティ名を使用してオブジェクトのプロパティにアクセス
+                Dim propInfo As PropertyInfo = target.GetType().GetProperty(_propertyName)
+                If propInfo Is Nothing Then
+                    Throw New InvalidOperationException($"プロパティ '{_propertyName}' が見つかりません。")
+                End If
 
-            ' 最終的な値をIValueに変換して返す
-            If TypeOf obj Is IValue Then
-                Return DirectCast(obj, IValue)
+                ' プロパティの値を取得
+                Dim obj = propInfo.GetValue(target, Nothing)
+
+                ' 最終的な値をIValueに変換して返す
+                If TypeOf obj Is IValue Then
+                    Return DirectCast(obj, IValue)
+                End If
+                Return ConvertToValue(obj)
             End If
-            Return ConvertToValue(obj)
         End Function
 
     End Class
