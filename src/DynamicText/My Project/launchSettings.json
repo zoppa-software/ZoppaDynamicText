@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DynamicText": {
+      "commandName": "Project",
+      "commandLineArgs": "--template resources\\template.txt --param resources\\param.txt"
+    }
+  }
+}
