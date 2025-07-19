@@ -13,7 +13,8 @@ Public Class AnalysisSwitchTest
             "Sample",
             "1.0.0.0",
             "このアプリケーションはサンプルです",
-            "© 2025 Sample Inc.",
+            "© 2025",
+            "Sample Inc.",
             "MIT License",
             False,
             New SubCommandDefine() {
@@ -49,7 +50,8 @@ Public Class AnalysisSwitchTest
                     "Sample",
                     "1.0.0.0",
                     "このアプリケーションはサンプルです",
-                    "© 2025 Sample Inc.",
+                    "© 2025",
+                    "Sample Inc.",
                     "MIT License",
                     False,
                     New SubCommandDefine() {
@@ -68,8 +70,11 @@ Public Class AnalysisSwitchTest
     <Fact>
     Public Sub AnalysisSwitchTest_3()
         Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appName:="ZoppaDynamicText",
+            appVersion:="1.0.0.0",
             appDescription:="埋込式を解析します。",
-            appCopyright:="© 2025 Sample Inc.",
+            appCopyright:="© 2025",
+            appAuthor:="Sample Inc.",
             appLicense:="MIT License",
             subCommandRequired:=False,
             subCommand:=Array.Empty(Of SubCommandDefine)(),
@@ -77,22 +82,24 @@ Public Class AnalysisSwitchTest
                 New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
                 New SwitchDefine("template", True, SwitchType.DoubleHyphen, ParameterType.URI, "埋込式を記述したテンプレートファイルパス。"),
                 New SwitchDefine("param", True, SwitchType.DoubleHyphen, ParameterType.URI, "パラメータファイルパス。")
-            }
+            },
+            ParameterType.Str
         )
 
         Dim sw = anaisSwitch.Parse(New String() {"--help"})
-        If sw.ContantsOption("help") Then
+        If sw.ContainsOption("help") Then
             Dim msg = anaisSwitch.GetHelp()
             Assert.Equal("名前
-    ZoppaDynamicText　1.0.0.0
+    ZoppaDynamicText
+    version 1.0.0.0 © 2025 Sample Inc. MIT License
 説明
     埋込式を解析します。
 文法
-    ZoppaDynamicText [--help] [--template <URI>] [--param <URI>] 
+    ZoppaDynamicText [--help] [--template <URI>] [--param <URI>]  <文字列>
 オプション
-    help:ヘルプを表示します。
-    template:埋込式を記述したテンプレートファイルパス。
-    param:パラメータファイルパス。
+    help : ヘルプを表示します。
+    template : 埋込式を記述したテンプレートファイルパス。
+    param : パラメータファイルパス。
 ", msg)
         Else
             Assert.Fail()
@@ -105,7 +112,8 @@ Public Class AnalysisSwitchTest
             "Sample",
             "1.0.0.0",
             "このアプリケーションはサンプルです",
-            "© 2025 Sample Inc.",
+            "© 2025",
+            "Sample Inc.",
             "MIT License",
             True,
             New SubCommandDefine() {
@@ -134,7 +142,8 @@ Public Class AnalysisSwitchTest
             "Sample",
             "1.0.0.0",
             "このアプリケーションはサンプルです",
-            "© 2025 Sample Inc.",
+            "© 2025",
+            "Sample Inc.",
             "MIT License",
             True,
             New SubCommandDefine() {
@@ -161,7 +170,7 @@ Public Class AnalysisSwitchTest
     Public Sub AnalysisSwitchTest_7()
         Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
             appDescription:="埋込式を解析します。",
-            appCopyright:="© 2025 Sample Inc.",
+            appAuthor:="Sample Inc.",
             appLicense:="MIT License",
             subCommandRequired:=False,
             subCommand:=Array.Empty(Of SubCommandDefine)(),

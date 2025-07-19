@@ -31,6 +31,10 @@ Namespace Switches
         ''' <remarks>このプロパティは、アプリケーションの著作権情報を表します。</remarks>
         Public ReadOnly Property AppCopyright As String
 
+        ''' <summary>アプリケーションの制作者情報。</summary>
+        ''' <remarks>このプロパティは、アプリケーションの制作者情報を表します。</remarks>
+        Public ReadOnly Property AppAuthor As String
+
         ''' <summary>アプリケーションのライセンス情報。</summary>
         ''' <remarks>このプロパティは、アプリケーションのライセンス情報を表します。</remarks>
         Public ReadOnly Property AppLicense As String
@@ -70,6 +74,7 @@ Namespace Switches
         ''' <param name="appVersion">アプリケーションのバージョン。</param>
         ''' <param name="appDescription">アプリケーションの説明。</param>
         ''' <param name="appCopyright">アプリケーションの著作権情報。</param>
+        ''' <param name="appAuthor">アプリケーションの制作者情報。</param>
         ''' <param name="appLicense">アプリケーションのライセンス情報。</param>
         ''' <param name="subCommandRequired">サブコマンドが必要かどうか。</param>
         ''' <param name="subCommand">サブコマンドの定義の配列。</param>
@@ -79,6 +84,7 @@ Namespace Switches
                         appVersion As String,
                         appDescription As String,
                         appCopyright As String,
+                        appAuthor As String,
                         appLicense As String,
                         subCommandRequired As Boolean,
                         subCommand() As SubCommandDefine,
@@ -88,6 +94,7 @@ Namespace Switches
             Me.AppVersion = appVersion
             Me.AppDescription = appDescription
             Me.AppCopyright = appCopyright
+            Me.AppAuthor = appAuthor
             Me.AppLicense = appLicense
             Me.SubCommands = New SubCommandSwitch(subCommandRequired, subCommand)
             If options IsNot Nothing Then
@@ -103,6 +110,7 @@ Namespace Switches
         ''' <param name="appVersion">アプリケーションのバージョン。</param>
         ''' <param name="appDescription">アプリケーションの説明。</param>
         ''' <param name="appCopyright">アプリケーションの著作権情報。</param>
+        ''' <param name="appAuthor">アプリケーションの制作者情報。</param>
         ''' <param name="appLicense">アプリケーションのライセンス情報。</param>
         ''' <param name="subCommandRequired">サブコマンドが必要かどうか。</param>
         ''' <param name="subCommand">サブコマンドの定義の配列。</param>
@@ -113,12 +121,13 @@ Namespace Switches
                                       appVersion As String,
                                       appDescription As String,
                                       appCopyright As String,
+                                      appAuthor As String,
                                       appLicense As String,
                                       subCommandRequired As Boolean,
                                       subCommand() As SubCommandDefine,
                                       options() As SwitchDefine,
                                       paramType As ParameterType) As AnalysisSwitch
-            Return New AnalysisSwitch(appName, appVersion, appDescription, appCopyright,
+            Return New AnalysisSwitch(appName, appVersion, appDescription, appCopyright, appAuthor,
                                       appLicense, subCommandRequired, subCommand, options, paramType)
         End Function
 
@@ -126,22 +135,23 @@ Namespace Switches
         ''' コマンドライン解析オブジェクトを作成します。
         ''' </summary>
         ''' <param name="appDescription">アプリケーションの説明。</param>
-        ''' <param name="appCopyright">アプリケーションの著作権情報。</param>
+        ''' <param name="appAuthor">アプリケーションの制作者情報。</param>
         ''' <param name="appLicense">アプリケーションのライセンス情報。</param>
         ''' <param name="subCommandRequired">サブコマンドが必要かどうか。</param>
         ''' <param name="subCommand">サブコマンドの定義の配列。</param>
         ''' <param name="options">コマンドラインオプションの定義の配列。</param>
         ''' <returns>AnalysisSwitchオブジェクト。</returns>
         Public Shared Function Create(appDescription As String,
-                                      appCopyright As String,
+                                      appAuthor As String,
                                       appLicense As String,
                                       subCommandRequired As Boolean,
                                       subCommand() As SubCommandDefine,
                                       options() As SwitchDefine,
                                       Optional paramType As ParameterType = ParameterType.None) As AnalysisSwitch
-            Dim appAsm = Assembly.GetExecutingAssembly()
+            Dim appAsm = Assembly.GetEntryAssembly()
+            Dim fileInfo = FileVersionInfo.GetVersionInfo(appAsm.Location)
             Return New AnalysisSwitch(appAsm.GetName().Name, appAsm.GetName().Version.ToString(), appDescription,
-                                      appCopyright, appLicense, subCommandRequired, subCommand, options, paramType)
+                                      fileInfo.LegalCopyright, appAuthor, appLicense, subCommandRequired, subCommand, options, paramType)
         End Function
 
         ''' <summary>
@@ -163,7 +173,8 @@ Namespace Switches
 
             ' ヘルプメッセージを定義します。
             Dim helpMessage As String = "名前
-    #{AppName}　#{AppVersion}
+    #{AppName}
+    version #{AppVersion} #{AppCopyright} #{AppAuthor} #{AppLicense}
 説明
     #{AppDescription}
 文法
@@ -172,7 +183,7 @@ Namespace Switches
 {for sw in SubCommands.Commands}    #{sw.Name}:#{sw.Description}
 {/for}{/trim}
 {/if}{if SwitchOptions.Length > 0}{trim}オプション
-{for sw in SwitchOptions}    #{sw.Name}:#{sw.Description}
+{for sw in SwitchOptions}    #{sw.Name} : #{sw.Description}
 {/for}{/trim}
 {/if}"
 
@@ -415,7 +426,7 @@ Namespace Switches
             ''' </summary>
             ''' <param name="swName">オプション名。</param>
             ''' <returns>オプションが存在していたら真。</returns>
-            Public Function ContantsOption(swName As String) As Boolean
+            Public Function ContainsOption(swName As String) As Boolean
                 Dim opt = Me.SwitchOptions.Where(Function(o) o.sw.Name = swName).Select(Function(t) t.sw).FirstOrDefault()
                 Return opt IsNot Nothing
             End Function
@@ -486,6 +497,20 @@ Namespace Switches
                 Me.swOption = sw
                 Me.swValue = prm
             End Sub
+
+            ''' <summary>スイッチの値を文字列として取得します。</summary>
+            ''' <returns>スイッチの値を表す文字列。</returns>
+            Public Function GetStr() As String
+                Dim res As String = Nothing
+                If Me.swOption.ParamType = ParameterType.Str Then
+                    If Me.swValue.Length > 0 Then
+                        res = Me.swValue(0)
+                    End If
+                Else
+                    Throw New ArgumentException($"スイッチ '{Me.swOption.Name}' はURI型ではありません。")
+                End If
+                Return res
+            End Function
 
             ''' <summary>スイッチの値をURIとして取得します。</summary>
             ''' <returns>スイッチの値を表すURI。</returns>
