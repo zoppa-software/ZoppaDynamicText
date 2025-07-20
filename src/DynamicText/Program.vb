@@ -73,36 +73,27 @@ Module Program
 
             ' 解析環境を初期化し、オブジェクトを登録します。
             Dim env As New AnalysisEnvironment()
-            Dim resultStr As String = String.Empty
+            Dim result As AnalysisResults
             Select Case Path.GetExtension(paramPath).ToLowerInvariant()
                 Case ".json"
                     ' JSONファイルの内容を解析して環境に登録します。
                     Dim jsonObject = ReadJsonModule.ConvertDynamicObjectFromJson(paramStr)
-                    Dim iter = jsonObject.GetEntries()
-                    While iter.MoveNext()
-                        env.RegistObject(iter.Current.Name, iter.Current.Value)
-                    End While
-                    Dim result = ParserModule.Translate(tempStr)
-                    resultStr = result.Expression.GetValue(env).Str.ToString()
+                    env.SetJsonVariable(jsonObject)
+                    result = ParserModule.Translate(tempStr)
 
                 Case ".csv"
                     ' CSVファイルの内容を解析して環境に登録します。
                     Dim spliter = CsvSpliter.CreateSpliter(paramStr)
-                    Dim datas As New List(Of DynamicObject)()
-                    Dim dat = spliter.Split()
-                    While Not dat.IsEmpty
-                        datas.Add(dat)
-                        dat = spliter.Split()
-                    End While
-                    env.RegistArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
-                    Dim result = ParserModule.Translate(tempStr)
-                    resultStr = result.Expression.GetValue(env).Str.ToString()
+                    env.SetCsvVariable(spliter, paramPath)
+                    result = ParserModule.Translate(tempStr)
 
                 Case Else
                     ' パラメータファイルの内容を解析して環境に登録します。
-                    Dim result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
-                    resultStr = result.Expression.GetValue(env).Str.ToString()
+                    result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
             End Select
+
+            ' 解析結果から文字列を取得します。
+            Dim resultStr = result.Expression.GetValue(env).Str.ToString()
 
             ' 結果を出力します。
             If analysisSwitches.ContainsOption("output") Then
@@ -110,7 +101,7 @@ Module Program
                 Dim outputPath = analysisSwitches.GetOption("output").GetURI().ConvertAbsolutePath()
                 Dim outputDir = System.IO.Path.GetDirectoryName(outputPath)
                 If Not IO.Directory.Exists(outputDir) Then
-                    IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(outputPath))
+                    IO.Directory.CreateDirectory(outputDir)
                 End If
                 System.IO.File.WriteAllText(outputPath, resultStr, encode)
             Else
@@ -124,6 +115,45 @@ Module Program
             System.Console.Error.WriteLine("詳細: " & ex.ToString())
             Environment.Exit(1) ' エラーコード1で終了
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' AnalysisEnvironmentにJSONオブジェクトを登録します。
+    ''' </summary>
+    ''' <param name="env">解析環境</param>
+    ''' <param name="jsonObject">JSONオブジェクト</param>
+    <Extension()>
+    Private Sub SetJsonVariable(env As AnalysisEnvironment, jsonObject As DynamicObject)
+        Dim iter = jsonObject.GetEntries()
+
+        ' JSONオブジェクトの各エントリをAnalysisEnvironmentに登録します。
+        While iter.MoveNext()
+            env.RegistObject(iter.Current.Name, iter.Current.Value)
+        End While
+    End Sub
+
+    ''' <summary>
+    ''' AnalysisEnvironmentにCSVデータを登録します。
+    ''' </summary>
+    ''' <param name="env">解析環境</param>
+    ''' <param name="spliter">CSVスプリッター</param>
+    ''' <param name="paramPath">パラメータファイルのパス</param>
+    ''' <remarks>
+    ''' CSVファイルを読み込み、各行をDynamicObjectとして登録します。
+    ''' </remarks>
+    <Extension()>
+    Private Sub SetCsvVariable(env As AnalysisEnvironment, spliter As CsvSpliter, paramPath As String)
+        Dim datas As New List(Of DynamicObject)()
+
+        ' CSVスプリッターを使用して、CSVファイルの各行をDynamicObjectに変換します。
+        Dim dat = spliter.Split()
+        While Not dat.IsEmpty
+            datas.Add(dat)
+            dat = spliter.Split()
+        End While
+
+        ' DynamicObjectを配列として解析し、環境に登録します。
+        env.RegistArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
     End Sub
 
     ''' <summary>
