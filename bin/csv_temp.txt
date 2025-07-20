@@ -1,0 +1,9 @@
+﻿\{
+	"parson": [
+		{trim ','}{for r in csv}\{
+			"Name": "#{r.Name}",
+			"age": #{r.age}
+		\},
+		{/for}{/trim}
+	]
+\}

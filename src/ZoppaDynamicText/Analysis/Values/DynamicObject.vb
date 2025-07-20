@@ -22,6 +22,18 @@ Namespace Analysis
         Private ReadOnly _prooerties As Btree(Of PropEntry)
 
         ''' <summary>
+        ''' プロパティが空かどうかを示すプロパティです。
+        ''' このプロパティは、動的オブジェクトにプロパティが存在しない場合にTrueを返します。
+        ''' プロパティが1つも存在しない場合、IsEmptyはTrueになります。
+        ''' </summary>
+        ''' <returns>プロパティが空かどうか。</returns>
+        Public ReadOnly Property IsEmpty As Boolean
+            Get
+                Return _prooerties.Count = 0
+            End Get
+        End Property
+
+        ''' <summary>
         ''' 指定された名前のプロパティを取得または設定します。
         ''' </summary>
         ''' <param name="name">プロパティ名。</param>

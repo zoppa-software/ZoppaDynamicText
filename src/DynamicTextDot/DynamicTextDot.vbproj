@@ -115,6 +115,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\csv.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="resources\param.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -131,6 +134,11 @@
     <PackageReference Include="System.Text.Json">
       <Version>9.0.7</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="resources\csv_temp.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

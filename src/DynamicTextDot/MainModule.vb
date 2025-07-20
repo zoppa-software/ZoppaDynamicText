@@ -4,6 +4,7 @@ Option Explicit On
 Imports System.IO
 Imports System.Runtime.CompilerServices
 Imports ZoppaDynamicText.Analysis
+Imports ZoppaDynamicText.LegacyFiles
 Imports ZoppaDynamicText.Switches
 
 ''' <summary>
@@ -87,6 +88,19 @@ Module MainModule
                     Dim result = ParserModule.Translate(tempStr)
                     resultStr = result.Expression.GetValue(env).Str.ToString()
 
+                Case ".csv"
+                    ' CSVファイルの内容を解析して環境に登録します。
+                    Dim spliter = CsvSpliter.CreateSpliter(paramStr)
+                    Dim datas As New List(Of DynamicObject)()
+                    Dim dat = spliter.Split()
+                    While Not dat.IsEmpty
+                        datas.Add(dat)
+                        dat = spliter.Split()
+                    End While
+                    env.RegistArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
+                    Dim result = ParserModule.Translate(tempStr)
+                    resultStr = result.Expression.GetValue(env).Str.ToString()
+
                 Case Else
                     ' パラメータファイルの内容を解析して環境に登録します。
                     Dim result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
@@ -126,6 +140,23 @@ Module MainModule
             Return pathUri.LocalPath
         Else
             Return IO.Path.Combine(Environment.CurrentDirectory, pathUri.OriginalString)
+        End If
+    End Function
+
+    ''' <summary>
+    ''' ファイル名を取得します。
+    ''' 拡張子を除いたファイル名を返します。
+    ''' </summary>
+    ''' <param name="filePath">ファイルパス</param>
+    ''' <returns>拡張子を除いたファイル名</returns>
+    <Extension()>
+    Private Function GetFileName(filePath As String) As String
+        Dim name = Path.GetFileName(filePath)
+        Dim ext = Path.GetExtension(name)
+        If String.IsNullOrEmpty(ext) Then
+            Return name
+        Else
+            Return name.Substring(0, name.Length - ext.Length)
         End If
     End Function
 
