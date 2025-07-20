@@ -51,11 +51,20 @@ Namespace Analysis
         ''' <summary>Brブロック。</summary>
         Private ReadOnly BrBlockString As U8String = U8String.NewString("{br}")
 
+        ''' <summary>仮想Brブロック。</summary>
+        Private ReadOnly VlBrBlockString As U8String = U8String.NewString("{vr}")
+
         ''' <summary>Trimブロック。</summary>
         Private ReadOnly TrimBlockString As U8String = U8String.NewString("{trim")
 
         ''' <summary>EndTrimブロック。</summary>
         Private ReadOnly EndTrimBlockString As U8String = U8String.NewString("{/trim}")
+
+        ''' <summary>Remブロック。</summary>
+        Private ReadOnly RemBlockString As U8String = U8String.NewString("{remove")
+
+        ''' <summary>EndRemブロック。</summary>
+        Private ReadOnly EndRemBlockString As U8String = U8String.NewString("{/remove}")
 
         ''' <summary>Emptyブロック。</summary>
         Private ReadOnly EmptyBlockString As U8String = U8String.NewString("{}")
@@ -216,28 +225,40 @@ Namespace Analysis
         Private Function GetStatementBlock(input As U8String, iter As U8String.U8StringIterator) As EmbeddedBlock
             Dim cmd = GetEmbeddedBlock(input, iter, False)
             If cmd.StartWith(IfBlockString) AndAlso If(cmd.At(3)?.IsWhiteSpace, True) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.IfBlock, cmd.Mid(4, cmd.Length - 5))
             ElseIf cmd.StartWith(ElseIfBlockString) AndAlso If(cmd.At(8)?.IsWhiteSpace, True) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.ElseIfBlock, cmd.Mid(9, cmd.Length - 10))
             ElseIf cmd = ElseBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.ElseBlock, cmd)
             ElseIf cmd = EndIfBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.EndIfBlock, cmd)
             ElseIf cmd.StartWith(ForBlockString) AndAlso If(cmd.At(4)?.IsWhiteSpace, True) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.ForBlock, cmd.Mid(5, cmd.Length - 6))
             ElseIf cmd = EndForBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.EndForBlock, cmd)
             ElseIf cmd.StartWith(SelectBlockString) AndAlso If(cmd.At(7)?.IsWhiteSpace, True) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.SelectBlock, cmd.Mid(8, cmd.Length - 9))
             ElseIf cmd.StartWith(SelectCaseBlockString) AndAlso If(cmd.At(5)?.IsWhiteSpace, True) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.SelectCaseBlock, cmd.Mid(6, cmd.Length - 7))
             ElseIf cmd = SelectDefaultBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.SelectDefaultBlock, cmd)
             ElseIf cmd = EndSelectBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.EndSelectBlock, cmd)
             ElseIf cmd = EmptyBlockString Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.EmptyBlock, cmd)
             ElseIf cmd.StartWith(SetBlockString) Then
+                SkipBrWord(iter)
                 Return New EmbeddedBlock(EmbeddedType.SetBlock, cmd.Mid(5, cmd.Length - 6))
             ElseIf cmd.StartWith(TrimBlockString) Then
                 Return New EmbeddedBlock(EmbeddedType.TrimBlock, If(cmd.Length > 7, cmd.Mid(6, cmd.Length - 7), U8String.Empty))
@@ -245,11 +266,49 @@ Namespace Analysis
                 Return New EmbeddedBlock(EmbeddedType.EndTrimBlock, cmd)
             ElseIf cmd = BrBlockString Then
                 Return New EmbeddedBlock(EmbeddedType.BrBlock, cmd)
+            ElseIf cmd = VlBrBlockString Then
+                SkipBrWord(iter)
+                Return New EmbeddedBlock(EmbeddedType.VlBrBlock, cmd)
+            ElseIf cmd.StartWith(RemBlockString) Then
+                SkipBrWord(iter)
+                Return New EmbeddedBlock(EmbeddedType.RemoveBlock, If(cmd.Length > 9, cmd.Mid(8, cmd.Length - 9), U8String.Empty))
+            ElseIf cmd = EndRemBlockString Then
+                SkipBrWord(iter)
+                Return New EmbeddedBlock(EmbeddedType.EndRemoveBlock, cmd)
             Else
                 ' 埋込ブロックが認識できない場合はエラーを返す
                 Throw New AnalysisException("無効な埋込ブロック: " & cmd.ToString())
             End If
         End Function
+
+        ''' <summary>仮想ブロックの空白をスキップします。</summary>
+        ''' <param name="iter">文字列のイテレーター。</param>
+        ''' <remarks>
+        ''' 仮想ブロックは改行を含む可能性があるため、改行をスキップします。
+        ''' </remarks>
+        Private Sub SkipBrWord(iter As U8String.U8StringIterator)
+            Dim bkidx = iter.CurrentIndex
+
+            ' 空白スペースをスキップします
+            Do
+                Dim pc = iter.Current
+                If Not pc?.IsWhiteSpace OrElse pc?.Raw0 = &HA OrElse pc?.Raw0 = &HD Then
+                    Exit Do
+                End If
+                iter.MoveNext()
+            Loop While iter.HasNext()
+
+            ' 仮想ブロックは改行を含む可能性があるため、改行をスキップ
+            Dim remf = False
+            While iter.HasNext() AndAlso (iter.Current?.Raw0 = &HA OrElse iter.Current?.Raw0 = &HD)
+                iter.MoveNext()
+                remf = True
+            End While
+
+            If Not remf Then
+                iter.SetCurrentIndex(bkidx)
+            End If
+        End Sub
 
         ''' <summary>特殊ブロックを取得します。</summary>
         ''' <param name="input">入力文字列。</param>

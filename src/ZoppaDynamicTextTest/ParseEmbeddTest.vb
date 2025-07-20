@@ -145,4 +145,125 @@ Public Class ParseEmbeddTest
         Assert.True(result.Expression.GetValue(venv).Str.Equals("name=Zoppa, age=49"))
     End Sub
 
+    <Fact>
+    Public Sub ParseEmbeddTest_VlBrTest()
+        Dim venv As New AnalysisEnvironment()
+        Dim input = U8String.NewString("仮想改行は、{vr} 
+なくなる改行です。")
+        Dim result = ParserModule.Translate(input)
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("仮想改行は、なくなる改行です。"))
+    End Sub
+
+    <Fact>
+    Public Sub ParseEmbeddTest_BrTest()
+        Dim venv As New AnalysisEnvironment()
+        Dim input = U8String.NewString("{vr}
+select
+    *
+from
+    employee
+{remove 'where'}
+where
+    {trim 'or'}
+{if name1 <> ''}    romaji = 'suzuki' or
+{/if}
+{if name2 <> ''}    romaji = 'tanaka' or
+{/if}
+{if name3 <> ''}    romaji = 'satoshi'
+{/if}
+    {/trim}
+{/remove}")
+        Dim result = ParserModule.Translate(input)
+        venv.RegistStr("name1", "鈴木")
+        venv.RegistStr("name2", "田中")
+        venv.RegistStr("name3", "佐藤")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'suzuki' or
+    romaji = 'tanaka' or
+    romaji = 'satoshi'
+"))
+
+        venv.RegistStr("name1", "")
+        venv.RegistStr("name2", "田中")
+        venv.RegistStr("name3", "佐藤")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'tanaka' or
+    romaji = 'satoshi'
+"))
+
+        venv.RegistStr("name1", "鈴木")
+        venv.RegistStr("name2", "")
+        venv.RegistStr("name3", "佐藤")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'suzuki' or
+    romaji = 'satoshi'
+"))
+
+        venv.RegistStr("name1", "鈴木")
+        venv.RegistStr("name2", "田中")
+        venv.RegistStr("name3", "")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'suzuki' or
+    romaji = 'tanaka'
+"))
+
+        venv.RegistStr("name1", "")
+        venv.RegistStr("name2", "")
+        venv.RegistStr("name3", "佐藤")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'satoshi'
+"))
+
+        venv.RegistStr("name1", "")
+        venv.RegistStr("name2", "田中")
+        venv.RegistStr("name3", "")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'tanaka'
+"))
+
+        venv.RegistStr("name1", "鈴木")
+        venv.RegistStr("name2", "")
+        venv.RegistStr("name3", "")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+where
+    romaji = 'suzuki'
+"))
+
+        venv.RegistStr("name1", "")
+        venv.RegistStr("name2", "")
+        venv.RegistStr("name3", "")
+        Assert.True(result.Expression.GetValue(venv).Str.Equals("select
+    *
+from
+    employee
+"))
+    End Sub
+
 End Class

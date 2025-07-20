@@ -12,9 +12,8 @@ Namespace Analysis
     ''' </remarks>
     Public NotInheritable Class AnalysisException
         Inherits Exception
-        ''' <summary>
-        ''' コンストラクタ。
-        ''' </summary>
+
+        ''' <summary>コンストラクタ。</summary>
         ''' <param name="message">例外メッセージ。</param>
         Public Sub New(message As String)
             MyBase.New(message)

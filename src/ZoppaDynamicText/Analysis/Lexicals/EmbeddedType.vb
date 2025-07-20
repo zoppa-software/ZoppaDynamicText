@@ -60,11 +60,20 @@ Namespace Analysis
         ''' <summary>brブロック。</summary>
         BrBlock
 
+        ''' <summary>仮想brブロック。</summary>
+        VlBrBlock
+
         ''' <summary>trimブロック。</summary>
         TrimBlock
 
         ''' <summary>end trimブロック。</summary>
         EndTrimBlock
+
+        ''' <summary>remブロック。</summary>
+        RemoveBlock
+
+        ''' <summary>end remブロック。</summary>
+        EndRemoveBlock
 
         ''' <summary>空ブロック。</summary>
         EmptyBlock

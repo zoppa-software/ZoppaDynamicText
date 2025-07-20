@@ -123,8 +123,14 @@ Namespace Analysis
         ''' <summary>改行式。</summary>
         BrExpression
 
+        ''' <summary>仮想改行式。</summary>
+        VlBrExpression
+
         ''' <summary>Trim式。</summary>
         TrimExpression
+
+        ''' <summary>Rem式。</summary>
+        RemoveExpression
 
     End Enum
 

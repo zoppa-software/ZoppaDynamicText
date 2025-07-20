@@ -95,6 +95,11 @@ Namespace Analysis
                         exprs.Add(BrExpression.Instance)
                         iter.Next()
 
+                    Case EmbeddedType.VlBrBlock
+                        ' 仮想Brのブロック
+                        exprs.Add(VlBrExpression.Instance)
+                        iter.Next()
+
                     Case EmbeddedType.TrimBlock
                         ' Trimブロック
                         Dim expr = ParseTrimStatement(iter, embedded.Str)
@@ -108,6 +113,20 @@ Namespace Analysis
                     Case EmbeddedType.EndTrimBlock
                         ' EndTrimのブロック
                         Throw New AnalysisException("Trimブロックが開始されていません。EndTrimはTrimブロック内でのみ使用できます。")
+
+                    Case EmbeddedType.RemoveBlock
+                        ' Remブロック
+                        Dim expr = ParseRemoveStatement(iter, embedded.Str)
+                        If iter.HasNext() AndAlso iter.Current.Kind = EmbeddedType.EndRemoveBlock Then
+                            exprs.Add(expr)
+                            iter.Next()
+                        Else
+                            Throw New AnalysisException("Trimブロックが閉じられていません。")
+                        End If
+
+                    Case EmbeddedType.EndRemoveBlock
+                        ' EndTrimのブロック
+                        Throw New AnalysisException("Remブロックが開始されていません。EndRemはRemブロック内でのみ使用できます。")
 
                     Case EmbeddedType.EmptyBlock
                         ' 空のブロック
@@ -534,6 +553,64 @@ Namespace Analysis
             ' ブロック内の要素のイテレータを作成します
             Dim contIter = iter.GetRangeIterator(st, ed)
             Return New TrimStatementExpression(exper.ToArray(), ParseEmbeddedText(contIter))
+        End Function
+
+        Private Function ParseRemoveStatement(iter As ParserIterator(Of EmbeddedBlock), remCmd As U8String) As IExpression
+            iter.Next()
+
+            ' Removeする文字列を解析します
+            Dim words = LexicalModule.SplitWords(remCmd)
+            Dim inIter As New ParserIterator(Of LexicalModule.Word)(words)
+
+            Dim exper As New List(Of IExpression)()
+            While (inIter.HasNext())
+                ' 要素を取得
+                exper.Add(ParseTernaryOperator(inIter))
+
+                ' カンマを評価
+                If inIter.HasNext() Then
+                    Select Case inIter.Current.Kind
+                        Case WordType.Comma
+                            ' カンマをスキップ
+                            inIter.Next()
+
+                        Case Else
+                            Throw New AnalysisException("無効な式です。")
+                    End Select
+                End If
+            End While
+
+            ' Remブロックの開始と終了位置を取得
+            Dim st = iter.CurrentIndex
+            Dim ed = iter.CurrentIndex
+            Dim lv = 0
+            While iter.HasNext()
+                Dim stat = iter.Current
+                Select Case stat.Kind
+                    Case EmbeddedType.RemoveBlock
+                        ' Remブロックの開始
+                        lv += 1
+
+                    Case EmbeddedType.EndRemoveBlock
+                        ' Remブロックの終了
+                        If lv > 0 Then
+                            lv -= 1
+                        Else
+                            Exit While ' ネストが終了でループも終了
+                        End If
+
+                    Case Else
+                        ' 他の埋め込みブロックは無視するか、エラーを投げることも可能ですが、ここでは無視します。
+                End Select
+                iter.Next()
+
+                ed = iter.CurrentIndex
+            End While
+
+            ' Remステートメントを解析します
+            ' ブロック内の要素のイテレータを作成します
+            Dim contIter = iter.GetRangeIterator(st, ed)
+            Return New RemStatementExpression(exper.ToArray(), ParseEmbeddedText(contIter))
         End Function
 
     End Module
