@@ -9,6 +9,11 @@ Public Class AnalysisSwitchTest
 
     <Fact>
     Public Sub AnalysisSwitchTest_1()
+        Dim d1 = New SubCommandDefine("run", "アプリケーションを実行します")
+        Dim s1 = d1.ToString()
+        Dim d2 = New SwitchDefine("verbose", False, SwitchType.DoubleHyphen, ParameterType.Str, "Enable verbose output")
+        Dim s2 = d2.ToString()
+
         Dim analysisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
             "Sample",
             "1.0.0.0",
@@ -186,6 +191,248 @@ Public Class AnalysisSwitchTest
         Dim paramPath = sw.GetOption("param").GetURI()
         Assert.Equal("resources\template.txt", tempPath.OriginalString)
         Assert.Equal("resources\param.txt", paramPath.OriginalString)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_8()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.Int, "整数"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "10"})
+        sw.CheckRequired()
+        Dim sw_n = sw.GetOption("p").GetInteger()
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.Equal(10, sw_n)
+        Assert.True(sw_p)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_9()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.Int, "整数"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし"),
+                New SwitchDefine("i", False, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "A"})
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.CheckRequired()
+            End Sub
+        )
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.GetOption("p").GetInteger()
+            End Sub
+        )
+
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.True(sw_p)
+
+        Dim sw_i = sw.ContainsOption("i")
+        Assert.False(sw_i)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_10()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.Dbl, "実数"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "10.1"})
+        sw.CheckRequired()
+        Dim sw_n = sw.GetOption("p").GetDouble()
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.Equal(10.1, sw_n)
+        Assert.True(sw_p)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_11()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.Dbl, "実数"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし"),
+                New SwitchDefine("i", False, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "A"})
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.CheckRequired()
+            End Sub
+        )
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.GetOption("p").GetDouble()
+            End Sub
+        )
+
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.True(sw_p)
+
+        Dim sw_i = sw.ContainsOption("i")
+        Assert.False(sw_i)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_12()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.URI, "Uri"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし"),
+                New SwitchDefine("i", False, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "\\\\\\"})
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.CheckRequired()
+            End Sub
+        )
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw.GetOption("p").GetDouble()
+            End Sub
+        )
+
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.True(sw_p)
+
+        Dim sw_i = sw.ContainsOption("i")
+        Assert.False(sw_i)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_13()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.SingleHyphen, ParameterType.Str, "文字列"),
+                New SwitchDefine("n", True, SwitchType.SingleHyphen, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"-np", "ABC"})
+        sw.CheckRequired()
+        Dim sw_n = sw.GetOption("p").GetStr()
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.Equal("ABC", sw_n)
+        Assert.True(sw_p)
+
+        Dim sw2 = anaisSwitch.Parse(New String() {"-np"})
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw2.CheckRequired()
+            End Sub
+        )
+
+        Assert.Throws(Of ArgumentException)(
+            Sub()
+                sw2.GetOption("p").GetStr()
+            End Sub
+        )
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_20()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.Slash, ParameterType.Str Or ParameterType.Array, "文字列"),
+                New SwitchDefine("n", True, SwitchType.Slash, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"/p", "ABC", "EFG", "/n"})
+        sw.CheckRequired()
+        Dim sw_n = sw.GetOption("p").GetStrArray()
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.Equal("ABC", sw_n(0))
+        Assert.Equal("EFG", sw_n(1))
+        Assert.True(sw_p)
+    End Sub
+
+    <Fact>
+    Public Sub AnalysisSwitchTest_21()
+        Dim anaisSwitch As AnalysisSwitch = AnalysisSwitch.Create(
+            appDescription:="埋込式を解析します。",
+            appAuthor:="Sample Inc.",
+            appLicense:="MIT License",
+            subCommandRequired:=False,
+            subCommand:=Array.Empty(Of SubCommandDefine)(),
+            options:=New SwitchDefine() {
+                New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
+                New SwitchDefine("p", True, SwitchType.Slash, ParameterType.Int Or ParameterType.Array, "整数"),
+                New SwitchDefine("n", True, SwitchType.Slash, ParameterType.None, "なし")
+            }
+        )
+
+        Dim sw = anaisSwitch.Parse(New String() {"/n", "/p", "1", "2"})
+        sw.CheckRequired()
+        Dim sw_n = sw.GetOption("p").GetIntegerArray()
+        Dim sw_p = sw.ContainsOption("n")
+        Assert.Equal(1, sw_n(0))
+        Assert.Equal(2, sw_n(1))
+        Assert.True(sw_p)
     End Sub
 
 End Class

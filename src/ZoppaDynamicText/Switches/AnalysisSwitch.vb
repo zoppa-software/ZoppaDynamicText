@@ -52,7 +52,7 @@ Namespace Switches
             End Get
         End Property
 
-        ''' <summary>スイッチの定義を表します。</summary>
+        ''' <summary>オプションの定義を表します。</summary>
         ''' <remarks>
         ''' このプロパティは、コマンドラインオプションの定義を含むSwitchDefineのリストを返します。
         ''' </remarks>
@@ -218,6 +218,7 @@ Namespace Switches
                     pType = "不明な型"
             End Select
 
+            ' 引数を表示
             If pType <> "" Then
                 If (typeValue And ParameterType.Array) <> 0 Then
                     Return $" <{pType}[]]>".ToStringValue()
@@ -225,7 +226,7 @@ Namespace Switches
                     Return $" <{pType}>".ToStringValue()
                 End If
             Else
-                Return String.Empty.ToStringValue()
+                Return StringValue.Empty
             End If
         End Function
 
@@ -300,13 +301,13 @@ Namespace Switches
         End Function
 
         ''' <summary>
-        ''' 指定された名前とスイッチタイプに基づいてオプションを取得します。
+        ''' 指定された名前とオプションタイプに基づいてオプションを取得します。
         ''' </summary>
         ''' <param name="name">オプションの名前。</param>
-        ''' <param name="swType">スイッチの種類。</param>
+        ''' <param name="swType">オプションの種類。</param>
         ''' <returns>指定されたオプションのSwitchDefineオブジェクト。</returns>
         ''' <remarks>
-        ''' このメソッドは、指定された名前とスイッチタイプに一致するSwitchDefineオブジェクトを返します。
+        ''' このメソッドは、指定された名前とオプションタイプに一致するSwitchDefineオブジェクトを返します。
         ''' </remarks>
         Private Function GetOption(name As String, swType As SwitchType) As SwitchDefine
             Dim res = SwitchOptions.Where(Function(sw) sw.SwType = swType).Where(Function(op) op.Name = name).FirstOrDefault()
@@ -374,6 +375,57 @@ Namespace Switches
         End Function
 
         ''' <summary>
+        ''' 整数値をチェックし、例外をスローします。
+        ''' </summary>
+        ''' <param name="prm">パラメータ値。</param>
+        ''' <param name="msg">エラーメッセージ。</param>
+        ''' <returns>整数値。</returns>
+        ''' <remarks>
+        ''' このメソッドは、指定されたパラメータが整数であることを確認し、そうでない場合は例外をスローします。
+        ''' </remarks>
+        Private Shared Function CheckIntegerThrowException(prm As String, msg As String) As Integer
+            Dim res As Integer
+            If Not Integer.TryParse(prm, res) Then
+                Throw New ArgumentException(msg)
+            End If
+            Return res
+        End Function
+
+        ''' <summary>
+        ''' 実数値をチェックし、例外をスローします。
+        ''' </summary>
+        ''' <param name="prm">パラメータ値。</param>
+        ''' <param name="msg">エラーメッセージ。</param>
+        ''' <returns>実数値。</returns>
+        ''' <remarks>
+        ''' このメソッドは、指定されたパラメータが実数であることを確認し、そうでない場合は例外をスローします。
+        ''' </remarks>
+        Private Shared Function CheckDoubleThrowException(prm As String, msg As String) As Double
+            Dim res As Double
+            If Not Double.TryParse(prm, res) Then
+                Throw New ArgumentException(msg)
+            End If
+            Return res
+        End Function
+
+        ''' <summary>
+        ''' URIをチェックし、例外をスローします。
+        ''' </summary>
+        ''' <param name="prm">パラメータ値。</param>
+        ''' <param name="msg">エラーメッセージ。</param>
+        ''' <returns>URIオブジェクト。</returns>
+        ''' <remarks>
+        ''' このメソッドは、指定されたパラメータがURI形式であることを確認し、そうでない場合は例外をスローします。
+        ''' </remarks>
+        Private Shared Function CheckUriThrowException(prm As String, msg As String) As Uri
+            Try
+                Return New Uri(prm, UriKind.RelativeOrAbsolute)
+            Catch ex As UriFormatException
+                Throw New ArgumentException(msg, ex)
+            End Try
+        End Function
+
+        ''' <summary>
         ''' コマンドライン解析の結果を表すクラスです。
         ''' </summary>
         ''' <remarks>
@@ -392,7 +444,7 @@ Namespace Switches
 
             ''' <summary>
             ''' オプションリストを取得します。
-            ''' <para>各要素は、スイッチ定義とそのパラメータの配列を含むタプルです。</para>
+            ''' <para>各要素は、オプション定義とそのパラメータの配列を含むタプルです。</para>
             ''' </summary>
             Public ReadOnly Property SwitchOptions As (sw As SwitchDefine, prm As String())()
 
@@ -456,6 +508,26 @@ Namespace Switches
                         Throw New ArgumentException($"オプション '{opt.sw.Name}' に必要なパラメータが指定されていません。")
                     End If
                 Next
+
+                ' オプションの型が正しいかをチェック
+                For Each opt In Me.SwitchOptions
+                    Dim ptype = (opt.sw.ParamType And Not ParameterType.Array)
+                    For Each prm In opt.prm
+                        Select Case ptype
+                            Case ParameterType.Str
+                                ' 文字列型は特にチェックなし
+                            Case ParameterType.Int
+                                ' 整数型のチェック
+                                CheckIntegerThrowException(prm, $"オプション '{opt.sw.Name}' のパラメータ '{prm}' は整数ではありません。")
+                            Case ParameterType.Dbl
+                                ' 実数型のチェック
+                                CheckDoubleThrowException(prm, $"オプション '{opt.sw.Name}' のパラメータ '{prm}' は実数ではありません。")
+                            Case ParameterType.URI
+                                ' URI型のチェック
+                                CheckUriThrowException(prm, $"オプション '{opt.sw.Name}' のパラメータ '{prm}' はURI形式ではありません。")
+                        End Select
+                    Next
+                Next
             End Sub
 
             ''' <summary>
@@ -474,55 +546,111 @@ Namespace Switches
         End Class
 
         ''' <summary>
-        ''' スイッチの値を表す構造体です。
+        ''' オプションの値を表す構造体です。
         ''' </summary>
         ''' <remarks>
-        ''' この構造体は、スイッチの定義とその値を保持します。
+        ''' この構造体は、オプションの定義とその値を保持します。
         ''' </remarks>
         Public Structure SwitchValue
 
-            ''' <summary>スイッチの定義を取得します。</summary>
+            ''' <summary>オプションの定義を取得します。</summary>
             Public ReadOnly swOption As SwitchDefine
 
-            ''' <summary>スイッチの値を取得します。</summary>
+            ''' <summary>オプションの値を取得します。</summary>
             Public ReadOnly swValue As String()
 
             ''' <summary>
             ''' コンストラクタ。
-            ''' <para>スイッチの定義と値を指定して、SwitchValueオブジェクトを初期化します。</para>
+            ''' <para>オプションの定義と値を指定して、SwitchValueオブジェクトを初期化します。</para>
             ''' </summary>
-            ''' <param name="sw">スイッチの定義。</param>
-            ''' <param name="prm">スイッチの値の配列。</param>
+            ''' <param name="sw">オプションの定義。</param>
+            ''' <param name="prm">オプションの値の配列。</param>
             Public Sub New(sw As SwitchDefine, prm As String())
                 Me.swOption = sw
                 Me.swValue = prm
             End Sub
 
-            ''' <summary>スイッチの値を文字列として取得します。</summary>
-            ''' <returns>スイッチの値を表す文字列。</returns>
-            Public Function GetStr() As String
-                Dim res As String = Nothing
-                If Me.swOption.ParamType = ParameterType.Str Then
-                    If Me.swValue.Length > 0 Then
-                        res = Me.swValue(0)
+            ''' <summary>オプションの値をチェックし、指定された型であることを確認します。</summary>
+            ''' <param name="prmType">期待されるパラメータの型。</param>
+            ''' <param name="prmTypeMsg">エラーメッセージに使用するパラメータの型の説明。</param>
+            ''' <remarks>
+            ''' このメソッドは、オプションの値が指定された型であることを確認し、そうでない場合は例外をスローします。
+            ''' </remarks>
+            Private Sub CheckOptionType(prmType As ParameterType, prmTypeMsg As String)
+                If Me.swOption.ParamType = prmType Then
+                    If Me.swValue.Length <= 0 Then
+                        Throw New ArgumentException($"オプション '{Me.swOption.Name}' が設定されていません")
                     End If
                 Else
-                    Throw New ArgumentException($"スイッチ '{Me.swOption.Name}' はURI型ではありません。")
+                    Throw New ArgumentException($"オプション '{Me.swOption.Name}' は{prmTypeMsg}ではありません。")
                 End If
+            End Sub
+
+            ''' <summary>オプションの値を文字列として取得します。</summary>
+            ''' <returns>オプションの値を表す文字列。</returns>
+            Public Function GetStr() As String
+                CheckOptionType(ParameterType.Str, "文字列型")
+                Return Me.swValue(0)
+            End Function
+
+            ''' <summary>オプションの値を整数値として取得します。</summary>
+            ''' <returns>オプションの値を表す整数値。</returns>
+            Public Function GetInteger() As Integer
+                CheckOptionType(ParameterType.Int, "整数")
+                Return CheckIntegerThrowException(Me.swValue(0), $"オプション '{Me.swOption.Name}' の値は整数ではありません。")
+            End Function
+
+            ''' <summary>オプションの値を実数値として取得します。</summary>
+            ''' <returns>オプションの値を表す実数値。</returns>
+            Public Function GetDouble() As Double
+                CheckOptionType(ParameterType.Dbl, "実数値")
+                Return CheckDoubleThrowException(Me.swValue(0), $"オプション '{Me.swOption.Name}' の値は実数ではありません。")
+            End Function
+
+            ''' <summary>オプションの値をURIとして取得します。</summary>
+            ''' <returns>オプションの値を表すURI。</returns>
+            Public Function GetURI() As Uri
+                CheckOptionType(ParameterType.URI, "URI型")
+                Return CheckUriThrowException(Me.swValue(0), $"オプション '{Me.swOption.Name}' の値は URI型ではありません。")
+            End Function
+
+            ''' <summary>オプションの値を文字列配列として取得します。</summary>
+            ''' <returns>オプションの値を表す文字列配列。</returns>
+            Public Function GetStrArray() As String()
+                CheckOptionType(ParameterType.Str Or ParameterType.Array, "文字列型")
+                Return CType(Me.swValue.Clone(), String())
+            End Function
+
+            ''' <summary>オプションの値を整数値配列として取得します。</summary>
+            ''' <returns>オプションの値を表す整数配列。</returns>
+            Public Function GetIntegerArray() As Integer()
+                CheckOptionType(ParameterType.Int Or ParameterType.Array, "整数")
+                Dim res As Integer() = New Integer(Me.swValue.Length - 1) {}
+                For i As Integer = 0 To Me.swValue.Length - 1
+                    res(i) = CheckIntegerThrowException(Me.swValue(i), $"オプション '{Me.swOption.Name}' の値は整数ではありません。")
+                Next
                 Return res
             End Function
 
-            ''' <summary>スイッチの値をURIとして取得します。</summary>
-            ''' <returns>スイッチの値を表すURI。</returns>
-            Public Function GetURI() As Uri
-                Dim res As Uri = Nothing
-                If Me.swOption.ParamType = ParameterType.URI Then
-                    If Me.swValue.Length > 0 Then
-                        res = New Uri(Me.swValue(0), UriKind.RelativeOrAbsolute)
-                    End If
-                Else
-                    Throw New ArgumentException($"スイッチ '{Me.swOption.Name}' はURI型ではありません。")
-                End If
+            ''' <summary>オプションの値を実数値として取得します。</summary>
+            ''' <returns>オプションの値を表す実数値。</returns>
+            Public Function GetDoubleArray() As Double()
+                CheckOptionType(ParameterType.Dbl Or ParameterType.Array, "実数値")
+                Dim res As Double() = New Double(Me.swValue.Length - 1) {}
+                For i As Integer = 0 To Me.swValue.Length - 1
+                    res(i) = CheckDoubleThrowException(Me.swValue(i), $"オプション '{Me.swOption.Name}' の値は実数ではありません。")
+                Next
+                Return res
+            End Function
+
+            ''' <summary>オプションの値をURIとして取得します。</summary>
+            ''' <returns>オプションの値を表すURI。</returns>
+            Public Function GetURIArray() As Uri()
+                CheckOptionType(ParameterType.URI Or ParameterType.Array, "URI型")
+                Dim res As Uri() = New Uri(Me.swValue.Length - 1) {}
+                For i As Integer = 0 To Me.swValue.Length - 1
+                    res(i) = CheckUriThrowException(Me.swValue(i), $"オプション '{Me.swOption.Name}' の値は URI型ではありません。")
+                Next
                 Return res
             End Function
 
