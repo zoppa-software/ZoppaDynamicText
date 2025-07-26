@@ -30,15 +30,14 @@ Namespace Strings
         Public ReadOnly Property IntegerValue As UInteger
             Get
                 ' UTF-8の値を取得
-                If Me.Raw1 = 0 Then
-                    Return Me.Raw0
-                ElseIf Me.Raw2 = 0 Then
-                    Return Me.Raw0 << 8 + Me.Raw1
-                ElseIf Me.Raw3 = 0 Then
-                    Return Me.Raw0 << 16 + Me.Raw1 << 8 + Me.Raw2
-                Else
-                    Return Me.Raw0 << 24 + Me.Raw1 << 16 + Me.Raw2 << 8 + Me.Raw3
-                End If
+                Dim res As UInteger = 0
+                For Each b As Byte In {Me.Raw0, Me.Raw1, Me.Raw2, Me.Raw3}
+                    If b <> 0 Then
+                        res <<= 8
+                        res = res Or b
+                    End If
+                Next
+                Return res
             End Get
         End Property
 
