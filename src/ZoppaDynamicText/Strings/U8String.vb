@@ -653,7 +653,11 @@ Namespace Strings
                         Return Nothing
                     End If
                 End While
-                Return U8Char.NewChar(Me.raw, Me._start + ci)
+                If Me._start + ci < Me.raw.Length Then
+                    Return U8Char.NewChar(Me.raw, Me._start + ci)
+                Else
+                    Return Nothing
+                End If
             End Function
 
             ''' <summary>
@@ -667,6 +671,11 @@ Namespace Strings
                 }
             End Function
 
+            ''' <summary>
+            ''' カレント位置を設定します。
+            ''' イテレーターの現在の位置を指定されたインデックスに設定します。
+            ''' </summary>
+            ''' <param name="current">新しい位置。</param>
             Sub SetCurrentIndex(current As Integer)
                 _current = current
             End Sub
