@@ -139,20 +139,20 @@ Module MainModule
     ''' AnalysisEnvironmentにCSVデータを登録します。
     ''' </summary>
     ''' <param name="env">解析環境</param>
-    ''' <param name="spliter">CSVスプリッター</param>
+    ''' <param name="splitter">CSVスプリッター</param>
     ''' <param name="paramPath">パラメータファイルのパス</param>
     ''' <remarks>
     ''' CSVファイルを読み込み、各行をDynamicObjectとして登録します。
     ''' </remarks>
     <Extension()>
-    Private Sub SetCsvVariable(env As AnalysisEnvironment, spliter As CsvSpliter, paramPath As String)
+    Private Sub SetCsvVariable(env As AnalysisEnvironment, splitter As CsvSpliter, paramPath As String)
         Dim datas As New List(Of DynamicObject)()
 
         ' CSVスプリッターを使用して、CSVファイルの各行をDynamicObjectに変換します。
-        Dim dat = spliter.Split()
+        Dim dat = splitter.Split()
         While Not dat.IsEmpty
             datas.Add(dat)
-            dat = spliter.Split()
+            dat = splitter.Split()
         End While
 
         ' DynamicObjectを配列として解析し、環境に登録します。
