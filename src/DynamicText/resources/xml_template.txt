@@ -1,0 +1,7 @@
+﻿{for proc in 買い物リスト.内容}
+id:#{proc.id}
+日付:#{proc.日付}
+買う物:#{proc.買う物}
+金額:#{proc.金額}
+----
+{/for}

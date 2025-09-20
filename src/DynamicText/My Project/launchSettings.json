@@ -2,7 +2,7 @@
   "profiles": {
     "DynamicText": {
       "commandName": "Project",
-      "commandLineArgs": "--template resources\\template.txt --param resources\\param.txt"
+      "commandLineArgs": "--template resources\\xml_template.txt --param resources\\data.xml"
     }
   }
 }

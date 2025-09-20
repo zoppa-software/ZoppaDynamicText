@@ -86,7 +86,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ReadJsonModule.vb" />
+    <Compile Include="..\DynamicText\ReadJsonModule.vb" />
+    <Compile Include="..\DynamicText\ReadXMLModule.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">

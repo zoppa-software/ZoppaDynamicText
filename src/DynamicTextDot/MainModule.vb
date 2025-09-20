@@ -104,6 +104,13 @@ Module MainModule
                     env.SetCsvVariable(splitter, paramPath)
                     result = ParserModule.Translate(tempStr)
 
+                Case ".xml"
+                    ' XMLファイルの内容を解析して環境に登録します。
+                    Dim xmlObject = ReadXMLModule.ConvertDynamicObjectFromXML(paramStr)
+                    env.SetXmlVariable(xmlObject)
+                    result = ParserModule.Translate(tempStr)
+
+
                 Case Else
                     ' パラメータファイルの内容を解析して環境に登録します。
                     result = ParserModule.Translate($"${{{paramStr}}}" & tempStr)
@@ -185,6 +192,21 @@ Module MainModule
 
         ' DynamicObjectを配列として解析し、環境に登録します。
         env.RegistArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
+    End Sub
+
+    ''' <summary>
+    ''' AnalysisEnvironmentにXMLオブジェクトを登録します。
+    ''' </summary>
+    ''' <param name="env">解析環境</param>
+    ''' <param name="xmlObject">XMLオブジェクト</param>
+    <Extension()>
+    Private Sub SetXmlVariable(env As AnalysisEnvironment, xmlObject As DynamicObject)
+        Dim iter = xmlObject.GetEntries()
+
+        ' JSONオブジェクトの各エントリをAnalysisEnvironmentに登録します。
+        While iter.MoveNext()
+            env.RegistObject(iter.Current.Name, iter.Current.Value)
+        End While
     End Sub
 
     ''' <summary>

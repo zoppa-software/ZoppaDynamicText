@@ -15,11 +15,13 @@ Namespace Analysis
     ''' </remarks>
     Public NotInheritable Class DynamicObject
 
+        Public Const DEFAULT_TEXT_PROPERTY_NAME As String = "XMLValueText"
+
         ''' <summary>プロパティを表すBtreeコレクション。</summary>
         ''' <remarks>
         ''' Btreeは、プロパティ名でソートされ、効率的な検索と挿入を提供します。
         ''' </remarks>
-        Private ReadOnly _prooerties As Btree(Of PropEntry)
+        Private ReadOnly _properties As Btree(Of PropEntry)
 
         ''' <summary>
         ''' プロパティが空かどうかを示すプロパティです。
@@ -29,7 +31,7 @@ Namespace Analysis
         ''' <returns>プロパティが空かどうか。</returns>
         Public ReadOnly Property IsEmpty As Boolean
             Get
-                Return _prooerties.Count = 0
+                Return _properties.Count = 0
             End Get
         End Property
 
@@ -43,22 +45,22 @@ Namespace Analysis
         ''' </remarks>
         Default Public Property Item(name As String) As Object
             Get
-                Dim entry = _prooerties.Search(New PropEntry(name, Nothing))
+                Dim entry = _properties.Search(New PropEntry(name, Nothing))
                 Return entry?.Value
             End Get
             Set(value As Object)
-                Dim entry As PropEntry = _prooerties.Search(New PropEntry(name, Nothing))
+                Dim entry As PropEntry = _properties.Search(New PropEntry(name, Nothing))
                 If entry IsNot Nothing Then
                     entry.Value = value
                 Else
-                    _prooerties.Insert(New PropEntry(name, value))
+                    _properties.Insert(New PropEntry(name, value))
                 End If
             End Set
         End Property
 
         ''' <summary>動的オブジェクトのコンストラクタ。</summary>
         Public Sub New()
-            _prooerties = New Btree(Of PropEntry)()
+            _properties = New Btree(Of PropEntry)()
         End Sub
 
         ''' <summary>
@@ -69,7 +71,23 @@ Namespace Analysis
         ''' </summary>
         ''' <returns>エントリのイテレータ。</returns>
         Public Function GetEntries() As IEnumerator(Of PropEntry)
-            Return _prooerties.GetEnumerator()
+            Return _properties.GetEnumerator()
+        End Function
+
+        ''' <summary>
+        ''' 動的オブジェクトの文字列表現を取得します。
+        ''' 
+        ''' このメソッドは、"Text"プロパティが存在する場合、その値を返します。
+        ''' "Text"プロパティが存在しない場合は、基底クラスのToStringメソッドを呼び出します。
+        ''' </summary>
+        ''' <returns>動的オブジェクトの文字列表現。</returns>
+        Public Overrides Function ToString() As String
+            Dim entry As PropEntry = _properties.Search(New PropEntry(DEFAULT_TEXT_PROPERTY_NAME, Nothing))
+            If entry IsNot Nothing Then
+                Return entry.Value.ToString()
+            Else
+                Return MyBase.ToString()
+            End If
         End Function
 
         ''' <summary>
