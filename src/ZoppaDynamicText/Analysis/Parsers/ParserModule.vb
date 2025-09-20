@@ -98,6 +98,18 @@ Namespace Analysis
             Return New AnalysisResults(input, exper)
         End Function
 
+        ''' <summary>変数定義ブロックを解析します。</summary>
+        ''' <param name="input">解析する文字列。</param>
+        ''' <param name="venv">変数定義を登録する解析環境。</param>
+        ''' <returns>解析結果の式。</returns>
+        ''' <remarks>
+        ''' このメソッドは、変数定義ブロックを解析し、解析環境に登録します。
+        ''' </remarks>
+        Public Sub TranslateVariablesToRegist(input As String, venv As AnalysisEnvironment)
+            Dim ans = ParseVariableDefineBlock(U8String.NewString(input))
+            ans.GetValue(venv)
+        End Sub
+
     End Module
 
 End Namespace

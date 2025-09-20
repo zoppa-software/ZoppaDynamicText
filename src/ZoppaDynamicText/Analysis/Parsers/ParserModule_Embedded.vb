@@ -145,7 +145,7 @@ Namespace Analysis
         ''' </summary>
         ''' <param name="embeddedText">変数定義ブロック文字列。</param>
         ''' <returns>変数定義式。</returns>
-        Private Function ParseVariableDefineBlock(embeddedText As U8String) As IExpression
+        Friend Function ParseVariableDefineBlock(embeddedText As U8String) As IExpression
             ' 式バッファを生成
             Dim exprs As New List(Of VariableDefineExpression)()
 

@@ -543,6 +543,18 @@ Namespace Switches
                 Return New SwitchValue(opt.sw, opt.prm)
             End Function
 
+            ''' <summary>
+            ''' 指定されたオプション名に対応するSwitchValueを取得します。
+            ''' </summary>
+            ''' <param name="swName">オプション名。</param>
+            ''' <returns>指定されたオプションのSwitchValue。</returns>
+            ''' <remarks>
+            ''' このメソッドは、指定されたオプション名に対応するSwitchValueを返します。
+            ''' </remarks>
+            Public Function GetOptions(swName As String) As IEnumerable(Of SwitchValue)
+                Return Me.SwitchOptions.Where(Function(o) o.sw.Name = swName).Select(Function(s) New SwitchValue(s.sw, s.prm))
+            End Function
+
         End Class
 
         ''' <summary>

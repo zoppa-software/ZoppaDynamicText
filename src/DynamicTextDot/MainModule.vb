@@ -2,9 +2,12 @@
 Option Explicit On
 
 Imports System.IO
+Imports System.Linq.Expressions
 Imports System.Runtime.CompilerServices
+Imports System.Text.Json.Nodes
 Imports ZoppaDynamicText.Analysis
 Imports ZoppaDynamicText.LegacyFiles
+Imports ZoppaDynamicText.Strings
 Imports ZoppaDynamicText.Switches
 
 ''' <summary>
@@ -35,6 +38,7 @@ Module MainModule
                     New SwitchDefine("help", False, SwitchType.DoubleHyphen, ParameterType.None, "ヘルプを表示します。"),
                     New SwitchDefine("template", True, SwitchType.DoubleHyphen, ParameterType.URI, "埋込式を記述したテンプレートファイルパス。"),
                     New SwitchDefine("param", True, SwitchType.DoubleHyphen, ParameterType.URI, "パラメータファイルパス。"),
+                    New SwitchDefine("var", False, SwitchType.DoubleHyphen, ParameterType.Str, "変数定義。"),
                     New SwitchDefine("encode", False, SwitchType.DoubleHyphen, ParameterType.Str, "ファイルエンコード、未指定の場合は UTF-8。"),
                     New SwitchDefine("output", False, SwitchType.DoubleHyphen, ParameterType.URI, "出力ファイルパス。")
                 }
@@ -74,8 +78,18 @@ Module MainModule
             End If
             Dim paramStr As String = System.IO.File.ReadAllText(paramPath, encode)
 
-            ' 解析環境を初期化し、オブジェクトを登録します。
+            ' 解析環境を作成します。
             Dim env As New AnalysisEnvironment()
+            RegisterDefaultFunctions(env)
+
+            ' 変数定義が指定されている場合は、環境に登録します。
+            If analysisSwitches.ContainsOption("var") Then
+                For Each varDef In analysisSwitches.GetOptions("var")
+                    ParserModule.TranslateVariablesToRegist(varDef.GetStr(), env)
+                Next
+            End If
+
+            ' 解析環境を初期化し、オブジェクトを登録します。
             Dim result As AnalysisResults
             Select Case Path.GetExtension(paramPath).ToLowerInvariant()
                 Case ".json"
@@ -86,8 +100,8 @@ Module MainModule
 
                 Case ".csv"
                     ' CSVファイルの内容を解析して環境に登録します。
-                    Dim spliter = CsvSpliter.CreateSpliter(paramStr)
-                    env.SetCsvVariable(spliter, paramPath)
+                    Dim splitter = CsvSpliter.CreateSpliter(paramStr)
+                    env.SetCsvVariable(splitter, paramPath)
                     result = ParserModule.Translate(tempStr)
 
                 Case Else
@@ -118,6 +132,20 @@ Module MainModule
             System.Console.Error.WriteLine("詳細: " & ex.ToString())
             Environment.Exit(1) ' エラーコード1で終了
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' AnalysisEnvironmentにデフォルトの関数を登録します。
+    ''' </summary>
+    ''' <param name="env">解析環境</param>
+    Private Sub RegisterDefaultFunctions(env As AnalysisEnvironment)
+        env.AddFunction(U8String.NewString("pow"), AddressOf MathModule.Pow)
+        env.AddFunction(U8String.NewString("round"), AddressOf MathModule.Round)
+        env.AddFunction(U8String.NewString("changeUpperSnakeCase"), AddressOf StringModule.ChangeUpperSnakeCase)
+        env.AddFunction(U8String.NewString("changeSnakeCase"), AddressOf StringModule.ChangeSnakeCase)
+        env.AddFunction(U8String.NewString("changeFirstCharLower"), AddressOf StringModule.ChangeFirstCharLower)
+        env.AddFunction(U8String.NewString("changeFirstCharUpper"), AddressOf StringModule.ChangeFirstCharUpper)
+        env.AddFunction(U8String.NewString("formatDate"), AddressOf StringModule.FormatDate)
     End Sub
 
     ''' <summary>
