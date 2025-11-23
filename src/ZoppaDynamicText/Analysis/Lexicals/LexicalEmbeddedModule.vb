@@ -78,42 +78,42 @@ Namespace Analysis
         ''' <returns>埋込ブロックリスト。</returns>
         <Extension()>
         Public Function SplitEmbeddedText(input As U8String) As EmbeddedBlock()
-            Dim embeddeds As New List(Of EmbeddedBlock)()
+            Dim embedders As New List(Of EmbeddedBlock)()
 
             Dim iter = input.GetIterator()
             While iter.HasNext()
                 If iter.Current IsNot Nothing Then
                     Dim c = iter.Current.Value
-                    Dim embedd As EmbeddedBlock
+                    Dim embed As EmbeddedBlock
                     If c.Size = 1 Then
                         ' 1文字の場合はトークン解析します
                         Select Case c.Raw0
                             Case &H7B ' {
                                 ' 埋込式ブロックを取得します
-                                embedd = GetStatementBlock(input, iter)
+                                embed = GetStatementBlock(input, iter)
                             Case &H21 ' !
                                 ' 非エスケープ埋込ブロック
-                                embedd = GetSpecialBlock(input, iter, EmbeddedType.NoEscapeUnfold)
+                                embed = GetSpecialBlock(input, iter, EmbeddedType.NoEscapeUnfold)
                             Case &H23 ' #
                                 ' 展開埋込ブロック
-                                embedd = GetSpecialBlock(input, iter, EmbeddedType.Unfold)
+                                embed = GetSpecialBlock(input, iter, EmbeddedType.Unfold)
                             Case &H24 ' $
                                 ' 変数宣言ブロック
-                                embedd = GetSpecialBlock(input, iter, EmbeddedType.VariableDefine)
+                                embed = GetSpecialBlock(input, iter, EmbeddedType.VariableDefine)
                             Case Else
                                 ' 非埋込ブロック
-                                embedd = New EmbeddedBlock(EmbeddedType.None, GetNoneEmbeddedBlock(input, iter))
+                                embed = New EmbeddedBlock(EmbeddedType.None, GetNoneEmbeddedBlock(input, iter))
                         End Select
                     Else
                         ' 非埋込ブロックを取得します
-                        embedd = New EmbeddedBlock(EmbeddedType.None, GetNoneEmbeddedBlock(input, iter))
+                        embed = New EmbeddedBlock(EmbeddedType.None, GetNoneEmbeddedBlock(input, iter))
                     End If
-                    embeddeds.Add(embedd)
+                    embedders.Add(embed)
                 End If
             End While
 
             ' 埋込ブロックリストを返します
-            Return embeddeds.ToArray()
+            Return embedders.ToArray()
         End Function
 
         ''' <summary>埋込ブロックを取得します。</summary>
