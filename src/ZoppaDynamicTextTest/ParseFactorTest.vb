@@ -123,15 +123,15 @@ Public Class ParseFactorTest
     Public Sub TestVariableFactor()
         Dim venv As New Analysis.AnalysisEnvironment()
 
-        venv.RegistNumber("x", 42)
+        venv.RegisterNumber("x", 42)
         Dim result1 = Analysis.ParserModule.Parse("x")
         Assert.Equal(42.0, result1.Expression.GetValue(venv).Number)
 
-        venv.RegistBool("y", True)
+        venv.RegisterBool("y", True)
         Dim result2 = Analysis.ParserModule.Parse("y")
         Assert.True(result2.Expression.GetValue(venv).Bool)
 
-        venv.RegistStr("z", "Hello")
+        venv.RegisterStr("z", "Hello")
         Dim result3 = Analysis.ParserModule.Parse("z")
         Assert.True(result3.Expression.GetValue(venv).Str.Equals("Hello"))
     End Sub
@@ -139,7 +139,7 @@ Public Class ParseFactorTest
     <Fact>
     Public Sub TestArrayAccessFactor()
         Dim venv As New Analysis.AnalysisEnvironment()
-        venv.RegistArray("arr", 1, 2, 3)
+        venv.RegisterArray("arr", 1, 2, 3)
         Dim result1 = Analysis.ParserModule.Parse("arr[0]")
         Assert.Equal(1.0, result1.Expression.GetValue(venv).Number)
         Dim result2 = Analysis.ParserModule.Parse("arr[1]")
@@ -164,7 +164,7 @@ Public Class ParseFactorTest
             .IsActive = True,
             .Scores = New Integer() {90, 80, 70}
         }
-        venv.RegistObject("testObj", testObj)
+        venv.RegisterObject("testObj", testObj)
         Dim result1 = Analysis.ParserModule.Parse("testObj.Name")
         Assert.True(result1.Expression.GetValue(venv).Str.Equals("崇"))
         Dim result2 = Analysis.ParserModule.Parse("testObj.Age")

@@ -7,7 +7,7 @@ Imports ZoppaDynamicText.Strings
 Namespace LegacyFiles
 
     ''' <summary>カンマ区切りで文字列を分割する機能です（EXCEL）</summary>
-    Public NotInheritable Class CsvSpliter
+    Public NotInheritable Class CsvSplitter
         Inherits Spliter
 
         ''' <summary>コンストラクタ。</summary>
@@ -25,15 +25,15 @@ Namespace LegacyFiles
         ''' <summary>カンマ区切り分割機能を生成します。</summary>
         ''' <param name="inputStream">入力ストリーム。</param>
         ''' <returns>カンマ区切り分割機能。</returns>
-        Public Shared Function CreateSpliter(inputStream As StreamReader) As CsvSpliter
-            Return New CsvSpliter(inputStream)
+        Public Shared Function CreateSplitter(inputStream As StreamReader) As CsvSplitter
+            Return New CsvSplitter(inputStream)
         End Function
 
         ''' <summary>カンマ区切り分割機能を生成します。</summary>
         ''' <param name="inputText">分割する文字列。</param>
         ''' <returns>カンマ区切り分割機能。</returns>
-        Public Shared Function CreateSpliter(inputText As String) As CsvSpliter
-            Return New CsvSpliter(inputText)
+        Public Shared Function CreateSplitter(inputText As String) As CsvSplitter
+            Return New CsvSplitter(inputText)
         End Function
 
         ''' <summary>行を読み取り、分割された文字列のリストを返します。</summary>

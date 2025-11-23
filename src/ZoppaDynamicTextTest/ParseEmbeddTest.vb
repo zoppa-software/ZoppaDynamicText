@@ -138,7 +138,7 @@ Public Class ParseEmbeddTest
         obj("age") = 49
 
         Dim venv As New AnalysisEnvironment()
-        venv.RegistObject("person", obj)
+        venv.RegisterObject("person", obj)
 
         Dim input = U8String.NewString("name=#{person.name}, age=#{person.age}")
         Dim result = ParserModule.Translate(input)
@@ -174,9 +174,9 @@ where
     {/trim}
 {/remove}")
         Dim result = ParserModule.Translate(input)
-        venv.RegistStr("name1", "鈴木")
-        venv.RegistStr("name2", "田中")
-        venv.RegistStr("name3", "佐藤")
+        venv.RegisterStr("name1", "鈴木")
+        venv.RegisterStr("name2", "田中")
+        venv.RegisterStr("name3", "佐藤")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -187,9 +187,9 @@ where
     romaji = 'satoshi'
 "))
 
-        venv.RegistStr("name1", "")
-        venv.RegistStr("name2", "田中")
-        venv.RegistStr("name3", "佐藤")
+        venv.RegisterStr("name1", "")
+        venv.RegisterStr("name2", "田中")
+        venv.RegisterStr("name3", "佐藤")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -199,9 +199,9 @@ where
     romaji = 'satoshi'
 "))
 
-        venv.RegistStr("name1", "鈴木")
-        venv.RegistStr("name2", "")
-        venv.RegistStr("name3", "佐藤")
+        venv.RegisterStr("name1", "鈴木")
+        venv.RegisterStr("name2", "")
+        venv.RegisterStr("name3", "佐藤")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -211,9 +211,9 @@ where
     romaji = 'satoshi'
 "))
 
-        venv.RegistStr("name1", "鈴木")
-        venv.RegistStr("name2", "田中")
-        venv.RegistStr("name3", "")
+        venv.RegisterStr("name1", "鈴木")
+        venv.RegisterStr("name2", "田中")
+        venv.RegisterStr("name3", "")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -223,9 +223,9 @@ where
     romaji = 'tanaka'
 "))
 
-        venv.RegistStr("name1", "")
-        venv.RegistStr("name2", "")
-        venv.RegistStr("name3", "佐藤")
+        venv.RegisterStr("name1", "")
+        venv.RegisterStr("name2", "")
+        venv.RegisterStr("name3", "佐藤")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -234,9 +234,9 @@ where
     romaji = 'satoshi'
 "))
 
-        venv.RegistStr("name1", "")
-        venv.RegistStr("name2", "田中")
-        venv.RegistStr("name3", "")
+        venv.RegisterStr("name1", "")
+        venv.RegisterStr("name2", "田中")
+        venv.RegisterStr("name3", "")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -245,9 +245,9 @@ where
     romaji = 'tanaka'
 "))
 
-        venv.RegistStr("name1", "鈴木")
-        venv.RegistStr("name2", "")
-        venv.RegistStr("name3", "")
+        venv.RegisterStr("name1", "鈴木")
+        venv.RegisterStr("name2", "")
+        venv.RegisterStr("name3", "")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from
@@ -256,9 +256,9 @@ where
     romaji = 'suzuki'
 "))
 
-        venv.RegistStr("name1", "")
-        venv.RegistStr("name2", "")
-        venv.RegistStr("name3", "")
+        venv.RegisterStr("name1", "")
+        venv.RegisterStr("name2", "")
+        venv.RegisterStr("name3", "")
         Assert.True(result.Expression.GetValue(venv).Str.Equals("select
     *
 from

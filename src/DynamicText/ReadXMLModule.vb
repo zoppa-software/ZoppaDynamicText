@@ -58,10 +58,14 @@ Module ReadXMLModule
                         ' 要素ノードの場合、再帰的に処理
                         Dim child = ParseXML(item)
                         If Not child.IsEmpty Then
-                            If Not children.ContainsKey(item.Name) Then
-                                children(item.Name) = New ArrayList()
+
+                            Dim value As ArrayList = Nothing
+                            If Not children.TryGetValue(item.Name, value) Then
+                                value = New ArrayList()
+                                children(item.Name) = value
                             End If
-                            children(item.Name).Add(child)
+
+                            value.Add(child)
                         End If
 
                     Case XmlNodeType.Text

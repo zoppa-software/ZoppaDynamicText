@@ -7,7 +7,7 @@ Public Class VariableEnvironmentTests
     <Fact>
     Public Sub RegistNumber_And_Get_ReturnsCorrectValue()
         Dim env As New AnalysisEnvironment()
-        env.RegistNumber("num", 42.0)
+        env.RegisterNumber("num", 42.0)
         Dim v = env.Get("num")
         Assert.Equal(VariableType.Number, v.Type)
         Assert.Equal(42.0, v.Number)
@@ -16,7 +16,7 @@ Public Class VariableEnvironmentTests
     <Fact>
     Public Sub RegistStr_And_Get_ReturnsCorrectValue()
         Dim env As New AnalysisEnvironment()
-        env.RegistStr("str", "hello")
+        env.RegisterStr("str", "hello")
         Dim v = env.Get("str")
         Assert.Equal(VariableType.Str, v.Type)
         Assert.Equal(U8String.NewString("hello"), v.Str(env))
@@ -25,7 +25,7 @@ Public Class VariableEnvironmentTests
     <Fact>
     Public Sub RegistBool_And_Get_ReturnsCorrectValue()
         Dim env As New AnalysisEnvironment()
-        env.RegistBool("flag", True)
+        env.RegisterBool("flag", True)
         Dim v = env.Get("flag")
         Assert.Equal(VariableType.Bool, v.Type)
         Assert.True(v.Bool)
@@ -34,17 +34,17 @@ Public Class VariableEnvironmentTests
     <Fact>
     Public Sub Unregist_RemovesVariable()
         Dim env As New AnalysisEnvironment()
-        env.RegistNumber("x", 1)
-        env.Unregist("x")
+        env.RegisterNumber("x", 1)
+        env.Unregister("x")
         Assert.Throws(Of KeyNotFoundException)(Sub() env.Get("x"))
     End Sub
 
     <Fact>
     Public Sub Hierarchy_ScopeTest()
         Dim env As New AnalysisEnvironment()
-        env.RegistNumber("x", 1)
+        env.RegisterNumber("x", 1)
         Using env.GetScope()
-            env.RegistNumber("x", 2)
+            env.RegisterNumber("x", 2)
             Assert.Equal(2, env.Get("x").Number)
         End Using
         Assert.Equal(1, env.Get("x").Number)
@@ -60,29 +60,29 @@ Public Class VariableEnvironmentTests
     Public Sub TimeSpanVariableTest()
         Dim env As New AnalysisEnvironment()
 
-        env.registTimeSpan("duration", New TimeSpan(1, 2, 3))
+        env.RegisterTimeSpan("duration", New TimeSpan(1, 2, 3))
         Dim v = env.Get("duration")
         Assert.Equal(VariableType.Time, v.Type)
         Assert.Equal(New TimeSpan(1, 2, 3), v.ToTime())
-        env.Unregist("duration")
+        env.Unregister("duration")
 
-        env.registTimeSpan("duration", TimeSpan.FromMinutes(90))
+        env.RegisterTimeSpan("duration", TimeSpan.FromMinutes(90))
         v = env.Get("duration")
         Assert.Equal(VariableType.Time, v.Type)
         Assert.Equal(TimeSpan.FromMinutes(90), v.ToTime())
-        env.Unregist("duration")
+        env.Unregister("duration")
     End Sub
 
     <Fact>
     Public Sub DateTimeVariableTest()
         Dim env As New AnalysisEnvironment()
-        env.RegistDateTime("date", New DateTime(2023, 10, 1, 12, 0, 0))
+        env.RegisterDateTime("date", New DateTime(2023, 10, 1, 12, 0, 0))
         Dim v = env.Get("date")
         Assert.Equal(VariableType.Date, v.Type)
         Assert.Equal(New DateTime(2023, 10, 1, 12, 0, 0), v.ToDate())
-        env.Unregist("date")
+        env.Unregister("date")
 
-        env.RegistDateTime("date", DateTime.Now)
+        env.RegisterDateTime("date", DateTime.Now)
         v = env.Get("date")
         Assert.Equal(VariableType.Date, v.Type)
         Assert.True(v.ToDate() <= DateTime.Now)

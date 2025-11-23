@@ -62,7 +62,7 @@ Namespace Analysis
             Using venv.GetScope()
                 For Each item In _collectionExpr.GetValue(venv).Array
                     ' 各アイテムに対して変数を登録
-                    venv.Regist(_varName, item.ToVariable())
+                    venv.Register(_varName, item.ToVariable())
 
                     ' ボディの式を評価
                     Dim bodyValue = _bodyExpr.GetValue(venv)

@@ -95,7 +95,7 @@ Module Program
 
                 Case ".csv"
                     ' CSVファイルの内容を解析して環境に登録します。
-                    Dim splitter = CsvSpliter.CreateSpliter(paramStr)
+                    Dim splitter = CsvSplitter.CreateSplitter(paramStr)
                     env.SetCsvVariable(splitter, paramPath)
                     result = ParserModule.Translate(tempStr)
 
@@ -160,7 +160,7 @@ Module Program
 
         ' JSONオブジェクトの各エントリをAnalysisEnvironmentに登録します。
         While iter.MoveNext()
-            env.RegistObject(iter.Current.Name, iter.Current.Value)
+            env.RegisterObject(iter.Current.Name, iter.Current.Value)
         End While
     End Sub
 
@@ -174,7 +174,7 @@ Module Program
     ''' CSVファイルを読み込み、各行をDynamicObjectとして登録します。
     ''' </remarks>
     <Extension()>
-    Private Sub SetCsvVariable(env As AnalysisEnvironment, splitter As CsvSpliter, paramPath As String)
+    Private Sub SetCsvVariable(env As AnalysisEnvironment, splitter As CsvSplitter, paramPath As String)
         Dim datas As New List(Of DynamicObject)()
 
         ' CSVスプリッターを使用して、CSVファイルの各行をDynamicObjectに変換します。
@@ -185,7 +185,7 @@ Module Program
         End While
 
         ' DynamicObjectを配列として解析し、環境に登録します。
-        env.RegistArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
+        env.RegisterArray(Of DynamicObject)(paramPath.GetFileName(), datas.ToArray())
     End Sub
 
     ''' <summary>
@@ -199,7 +199,7 @@ Module Program
 
         ' JSONオブジェクトの各エントリをAnalysisEnvironmentに登録します。
         While iter.MoveNext()
-            env.RegistObject(iter.Current.Name, iter.Current.Value)
+            env.RegisterObject(iter.Current.Name, iter.Current.Value)
         End While
     End Sub
 

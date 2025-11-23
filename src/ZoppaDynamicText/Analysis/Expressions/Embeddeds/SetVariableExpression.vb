@@ -47,7 +47,7 @@ Namespace Analysis
         ''' <returns>空の文字列値。</returns>
         Public Function GetValue(venv As AnalysisEnvironment) As IValue Implements IExpression.GetValue
             If venv.Contains(_name) Then
-                venv.RegistExpr(_name, _value)
+                venv.RegisterExpr(_name, _value)
             Else
                 ' 変数が存在しない場合は、エラーをスローします。
                 Throw New KeyNotFoundException($"'{_name}'変数が存在しません")

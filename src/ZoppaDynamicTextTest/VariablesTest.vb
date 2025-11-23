@@ -27,27 +27,27 @@ Public Class VariablesTest
 
         Dim vars As New Variables()
         Dim v = U8String.NewString("foo")
-        vars.Regist("x", New DummyVariable(v))
+        vars.Register("x", New DummyVariable(v))
         Assert.Equal(v, CType(vars.Get("x"), DummyVariable).Data)
 
         ' 新しい変数を登録
         Dim v1 = U8String.NewString("bar")
-        vars.Regist("x", New DummyVariable(v1))
+        vars.Register("x", New DummyVariable(v1))
         Assert.Equal(v1, CType(vars.Get("x"), DummyVariable).Data)
 
         ' もう一度同じ値で登録してもエラーにならない
-        vars.Regist("x", New DummyVariable(v1))
+        vars.Register("x", New DummyVariable(v1))
         Assert.Equal(v1, CType(vars.Get("x"), DummyVariable).Data)
 
         ' 変数を登録解除
-        vars.Unregist("x")
+        vars.Unregister("x")
         Assert.Throws(Of KeyNotFoundException)(Function() vars.Get("x"))
     End Sub
 
     <Fact>
     Public Sub RegistExprTest()
         Dim env As New AnalysisEnvironment()
-        env.RegistExpr("define", "${a=10}")
+        env.RegisterExpr("define", "${a=10}")
         Dim result = ParserModule.Translate("#{define}変数a = '#{a}'")
         Assert.True(result.Expression.GetValue(env).Str.Equals("変数a = '10'"))
     End Sub

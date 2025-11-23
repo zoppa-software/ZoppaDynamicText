@@ -46,7 +46,7 @@ Namespace Analysis
         ''' <param name="venv">変数環境。</param>
         ''' <returns>空の文字列値。</returns>
         Public Function GetValue(venv As AnalysisEnvironment) As IValue Implements IExpression.GetValue
-            venv.RegistExpr(_name, _value)
+            venv.RegisterExpr(_name, _value)
             Return StringValue.Empty
         End Function
 

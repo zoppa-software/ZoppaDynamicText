@@ -18,19 +18,19 @@ Namespace Analysis
     Public NotInheritable Class AnalysisEnvironment
 
         ' 変数階層
-        Private ReadOnly _hierarhy As Variables
+        Private ReadOnly _hierarchy As Variables
 
         ' 関数リスト
-        Private ReadOnly _functuons As Btree(Of FuncEntry)
+        Private ReadOnly _functions As Btree(Of FuncEntry)
 
         ' プロパティリスト
         Private ReadOnly _properties As Dictionary(Of Type, Btree(Of PropEntry))
 
         ''' <summary>コンストラクタ。</summary>
         Public Sub New()
-            Me._hierarhy = New Variables()
-            Me._functuons = New Btree(Of FuncEntry)()
-            Me._functuons.Insert(
+            Me._hierarchy = New Variables()
+            Me._functions = New Btree(Of FuncEntry)()
+            Me._functions.Insert(
                 New FuncEntry(U8String.NewString("now"), Nothing, GetType(AnalysisEnvironment).GetMethod("Now", BindingFlags.NonPublic Or BindingFlags.Static))
             )
             Me._properties = New Dictionary(Of Type, Btree(Of PropEntry))()
@@ -48,82 +48,82 @@ Namespace Analysis
         ''' <summary>指定したキーと値の変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する変数の値。</param>
-        Public Sub Regist(key As U8String, value As IVariable)
-            Me._hierarhy.Regist(key, value)
+        Public Sub Register(key As U8String, value As IVariable)
+            Me._hierarchy.Register(key, value)
         End Sub
 
         ''' <summary>指定したキーと値の式を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する式。</param>
-        Sub RegistExpr(key As U8String, value As IExpression)
-            Me._hierarhy.Regist(key, New ExprVariable(value))
+        Sub RegisterExpr(key As U8String, value As IExpression)
+            Me._hierarchy.Register(key, New ExprVariable(value))
         End Sub
 
         ''' <summary>指定したキーと値の式を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="command">登録する式。</param>
-        Public Sub RegistExpr(key As String, command As String)
+        Public Sub RegisterExpr(key As String, command As String)
             Dim expr As IExpression = ParserModule.Translate(command).Expression
-            Me._hierarhy.Regist(U8String.NewString(key), New ExprVariable(expr))
+            Me._hierarchy.Register(U8String.NewString(key), New ExprVariable(expr))
         End Sub
 
-        Public Sub RegistExpr(key As String, value As IExpression)
-            Me._hierarhy.Regist(U8String.NewString(key), New ExprVariable(value))
+        Public Sub RegisterExpr(key As String, value As IExpression)
+            Me._hierarchy.Register(U8String.NewString(key), New ExprVariable(value))
         End Sub
 
         ''' <summary>指定したキーと値の数値変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する変数の値。</param>
-        Public Sub RegistNumber(key As String, value As Double)
-            Me._hierarhy.Regist(U8String.NewString(key), New NumberVariable(value))
+        Public Sub RegisterNumber(key As String, value As Double)
+            Me._hierarchy.Register(U8String.NewString(key), New NumberVariable(value))
         End Sub
 
         ''' <summary>指定したキーと値の文字列変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する変数の値。</param>
-        Public Sub RegistStr(key As String, value As String)
-            Me._hierarhy.Regist(U8String.NewString(key), New StringVariable(U8String.NewString(value)))
+        Public Sub RegisterStr(key As String, value As String)
+            Me._hierarchy.Register(U8String.NewString(key), New StringVariable(U8String.NewString(value)))
         End Sub
 
         ''' <summary>指定したキーと値の真偽値変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する変数の値。</param>
-        Public Sub RegistBool(key As String, value As Boolean)
-            Me._hierarhy.Regist(U8String.NewString(key), If(value, BooleanVariable.TrueValue, BooleanVariable.FalseValue))
+        Public Sub RegisterBool(key As String, value As Boolean)
+            Me._hierarchy.Register(U8String.NewString(key), If(value, BooleanVariable.TrueValue, BooleanVariable.FalseValue))
         End Sub
 
         ''' <summary>指定したキーと値の配列を登録します。</summary>
         ''' <typeparam name="T">配列の値。</typeparam>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する配列。</param>
-        Public Sub RegistArray(Of T)(key As String, ParamArray value As T())
+        Public Sub RegisterArray(Of T)(key As String, ParamArray value As T())
             ' 配列の値をIExpression型に変換
             Dim exprArray = New IExpression(value.Length - 1) {}
             For i As Integer = 0 To value.Length - 1
                 exprArray(i) = ConvertToExpression(value(i))
             Next
-            Me._hierarhy.Regist(U8String.NewString(key), New ArrayVariable(exprArray))
+            Me._hierarchy.Register(U8String.NewString(key), New ArrayVariable(exprArray))
         End Sub
 
         ''' <summary>指定したキーと値のオブジェクト変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="obj">登録するオブジェクト。</param>
-        Public Sub RegistObject(key As String, obj As Object)
-            Me._hierarhy.Regist(U8String.NewString(key), New ObjectVariable(obj))
+        Public Sub RegisterObject(key As String, obj As Object)
+            Me._hierarchy.Register(U8String.NewString(key), New ObjectVariable(obj))
         End Sub
 
         ''' <summary>指定したキーと値の日時変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する日時。</param>
-        Public Sub RegistDateTime(key As String, value As DateTime)
-            Me._hierarhy.Regist(U8String.NewString(key), New DateTimeVariable(value))
+        Public Sub RegisterDateTime(key As String, value As DateTime)
+            Me._hierarchy.Register(U8String.NewString(key), New DateTimeVariable(value))
         End Sub
 
         ''' <summary>指定したキーと値の時間間隔変数を登録します。</summary>
         ''' <param name="key">登録する変数のキー。</param>
         ''' <param name="value">登録する時間間隔。</param>
-        Public Sub RegistTimeSpan(key As String, value As TimeSpan)
-            Me._hierarhy.Regist(U8String.NewString(key), New TimeSpanVariable(value))
+        Public Sub RegisterTimeSpan(key As String, value As TimeSpan)
+            Me._hierarchy.Register(U8String.NewString(key), New TimeSpanVariable(value))
         End Sub
 
         ''' <summary>
@@ -137,7 +137,7 @@ Namespace Analysis
         ''' もし見つからない場合は、例外をスローします。
         ''' </remarks>
         Function [Get](key As U8String) As IVariable
-            Dim result = Me._hierarhy.Get(key)
+            Dim result = Me._hierarchy.Get(key)
             If result Is Nothing Then
                 Throw New KeyNotFoundException($"変数 '{key}' は存在しません")
             End If
@@ -162,7 +162,7 @@ Namespace Analysis
         ''' <param name="key">確認する変数のキー。</param>
         ''' <returns>指定されたキーが存在する場合はTrue、存在しない場合はFalse。</returns>
         Public Function Contains(key As U8String) As Boolean
-            Return Me._hierarhy.Contains(key)
+            Return Me._hierarchy.Contains(key)
         End Function
 
         ''' <summary>
@@ -172,8 +172,8 @@ Namespace Analysis
         ''' <remarks>
         ''' このメソッドは、現在の階層から指定されたキーの変数を削除します。
         ''' </remarks>
-        Public Sub Unregist(key As String)
-            Me._hierarhy.Unregist(U8String.NewString(key))
+        Public Sub Unregister(key As String)
+            Me._hierarchy.Unregister(U8String.NewString(key))
         End Sub
 
         ''' <summary>
@@ -182,7 +182,7 @@ Namespace Analysis
         ''' </summary>
         ''' <returns></returns>
         Public Function GetScope() As Variables.Scope
-            Return _hierarhy.GetScope()
+            Return _hierarchy.GetScope()
         End Function
 
         ''' <summary>
@@ -194,7 +194,7 @@ Namespace Analysis
         ''' <param name="func">関数の実行方法。</param>
         Public Sub AddFunction(name As U8String, func As Func(Of IValue))
             Dim entry As New FuncEntry(name, func.Target, func.Method)
-            Me._functuons.Insert(entry)
+            Me._functions.Insert(entry)
         End Sub
 
         ''' <summary>
@@ -206,7 +206,7 @@ Namespace Analysis
         ''' <param name="func">関数の実行方法。</param>
         Public Sub AddFunction(name As U8String, func As Func(Of IValue, IValue))
             Dim entry As New FuncEntry(name, func.Target, func.Method)
-            Me._functuons.Insert(entry)
+            Me._functions.Insert(entry)
         End Sub
 
         ''' <summary>
@@ -218,7 +218,7 @@ Namespace Analysis
         ''' <param name="func">関数の実行方法。</param>
         Public Sub AddFunction(name As U8String, func As Func(Of IValue, IValue, IValue))
             Dim entry As New FuncEntry(name, func.Target, func.Method)
-            Me._functuons.Insert(entry)
+            Me._functions.Insert(entry)
         End Sub
 
         ''' <summary>
@@ -230,7 +230,7 @@ Namespace Analysis
         ''' <param name="func">関数の実行方法。</param>
         Public Sub AddFunction(name As U8String, func As Func(Of IValue(), IValue))
             Dim entry As New FuncEntry(name, func.Target, func.Method)
-            Me._functuons.Insert(entry)
+            Me._functions.Insert(entry)
         End Sub
 
         ''' <summary>
@@ -244,7 +244,7 @@ Namespace Analysis
         ''' このメソッドは、登録された関数を呼び出し、結果を返します。
         ''' </remarks>
         Friend Function CallFunction(name As U8String, parameter() As IValue) As IValue
-            Dim entry = Me._functuons.Search(New FuncEntry(name, Nothing, Nothing))
+            Dim entry = Me._functions.Search(New FuncEntry(name, Nothing, Nothing))
             Return CType(entry.callfunc?.Invoke(entry.callins, parameter), IValue)
         End Function
 
@@ -257,7 +257,7 @@ Namespace Analysis
         ''' このメソッドは、オブジェクトのプロパティを変数階層に登録します。
         ''' プロパティ名はU8Stringとして保存されます。
         ''' </remarks>
-        Public Sub RegistReflectObject(params As Object)
+        Public Sub RegisterReflectObject(params As Object)
             If params Is Nothing Then
                 Throw New ArgumentNullException(NameOf(params))
             End If
@@ -282,8 +282,8 @@ Namespace Analysis
 
             ' プロパティを変数階層に登録
             For Each prop In _properties(typeKey)
-                Dim value = prop.callprop.GetValue(params, Nothing)
-                Me._hierarhy.Regist(prop.propname, ConvertToVariable(value))
+                Dim value = prop.CallProp.GetValue(params, Nothing)
+                Me._hierarchy.Register(prop.PropName, ConvertToVariable(value))
             Next
         End Sub
 

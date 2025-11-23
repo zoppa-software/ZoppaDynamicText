@@ -31,7 +31,7 @@ Namespace Analysis
         ''' 既に同じ名前の変数が存在する場合は、値を更新します。
         ''' </summary>
         ''' <param name="name">登録する変数名。</param>
-        Public Sub Regist(name As U8String, value As IVariable)
+        Public Sub Register(name As U8String, value As IVariable)
             ' エントリキーを作成
             Dim entry As New Entry(name, value)
 
@@ -57,8 +57,8 @@ Namespace Analysis
         ''' <param name="name">登録する変数名。</param>
         ''' <param name="value">登録する変数の値。</param>
         ''' <exception cref="ArgumentNullException">valueがnullの場合にスローされます。</exception>
-        Public Sub Regist(name As String, value As IVariable)
-            Me.Regist(U8String.NewString(name), value)
+        Public Sub Register(name As String, value As IVariable)
+            Me.Register(U8String.NewString(name), value)
         End Sub
 
         ''' <summary>
@@ -93,7 +93,7 @@ Namespace Analysis
         ''' 指定した名前の変数が存在する場合は削除します。
         ''' </summary>
         ''' <param name="name">登録解除する変数名。</param>
-        Public Sub Unregist(name As U8String)
+        Public Sub Unregister(name As U8String)
             ' 現在のスコープに変数名が存在する場合、スコープから削除します。
             If _scope.Count > 0 AndAlso _scope.Peek()._names.Contains(name) Then
                 _scope.Peek()._names.Remove(name)
@@ -111,8 +111,8 @@ Namespace Analysis
         ''' 指定した名前の変数が存在する場合は削除します。
         ''' </summary>
         ''' <param name="name">登録解除する変数名。</param>
-        Public Sub Unregist(name As String)
-            Me.Unregist(U8String.NewString(name))
+        Public Sub Unregister(name As String)
+            Me.Unregister(U8String.NewString(name))
         End Sub
 
         ''' <summary>
@@ -196,7 +196,7 @@ Namespace Analysis
             Public Sub Dispose() Implements IDisposable.Dispose
                 Me._variables._scope.Pop()
                 For Each name In _names
-                    Me._variables.Unregist(name)
+                    Me._variables.Unregister(name)
                 Next
             End Sub
 

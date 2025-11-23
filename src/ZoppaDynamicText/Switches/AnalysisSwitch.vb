@@ -164,11 +164,11 @@ Namespace Switches
         Public Function GetHelp() As String
             ' 解析環境を初期化し、オブジェクトを登録します。
             Dim env As New AnalysisEnvironment()
-            env.RegistReflectObject(Me)
+            env.RegisterReflectObject(Me)
 
             ' サブコマンドとオプションの展開式を登録します。
-            env.RegistExpr("subCommand", "{trim}{trim '|'}{for sw in SubCommands.Commands}#{sw.Name} | {/for}{/trim}{/trim}")
-            env.RegistExpr("options", "{select sw.SwType}{case 1}-{case 2}--{case 3}/{/select}#{sw.Name}#{convParamType(sw.ParamType)}")
+            env.RegisterExpr("subCommand", "{trim}{trim '|'}{for sw in SubCommands.Commands}#{sw.Name} | {/for}{/trim}{/trim}")
+            env.RegisterExpr("options", "{select sw.SwType}{case 1}-{case 2}--{case 3}/{/select}#{sw.Name}#{convParamType(sw.ParamType)}")
             env.AddFunction(U8String.NewString("convParamType"), AddressOf GetParamType)
 
             ' ヘルプメッセージを定義します。
